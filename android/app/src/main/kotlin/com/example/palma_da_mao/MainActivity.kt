@@ -1,0 +1,5 @@
+package com.example.palma_da_mao
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
