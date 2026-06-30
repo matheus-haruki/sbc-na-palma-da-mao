@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:palma_da_mao/core/design_system/app_assets.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -12,30 +15,31 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  void _onDestinationSelected(int index) {
-    if (_currentIndex == index) return;
-
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Modular.to.navigate('/home/');
-        break;
-      case 1:
-        Modular.to.navigate('/servicos/');
-        break;
-      case 2:
-        Modular.to.navigate('/mais/');
-        break;
-    }
-  }
+  final _routes = const ['/home/', '/servicos/', '/mais/'];
 
   @override
   void initState() {
     super.initState();
-    Modular.to.navigate('/home/');
+    Modular.to.navigate(_routes[_currentIndex]);
+  }
+
+  void _onDestinationSelected(int index) {
+    if (_currentIndex == index) return;
+
+    setState(() => _currentIndex = index);
+    Modular.to.navigate(_routes[index]);
+  }
+
+  Widget _buildIcon(String asset, bool selected) {
+    return SvgPicture.asset(
+      asset,
+      width: 20,
+      height: 20,
+      colorFilter: ColorFilter.mode(
+        selected ? AppColors.primary : AppColors.textSecondary,
+        BlendMode.srcIn,
+      ),
+    );
   }
 
   @override
@@ -45,20 +49,36 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onDestinationSelected,
-        destinations: const [
+        indicatorColor: Colors.transparent,
+
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+
+        // 👇 TEXTO
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return const TextStyle(color: Colors.grey, fontSize: 12);
+        }),
+
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
+            icon: _buildIcon(AppAssets.iconeHome, false),
+            selectedIcon: _buildIcon(AppAssets.iconeHome, true),
             label: 'Início',
           ),
           NavigationDestination(
-            icon: Icon(Icons.list_alt_outlined),
-            selectedIcon: Icon(Icons.list_alt),
+            icon: _buildIcon(AppAssets.iconeServicos, false),
+            selectedIcon: _buildIcon(AppAssets.iconeServicos, true),
             label: 'Serviços',
           ),
           NavigationDestination(
-            icon: Icon(Icons.more_horiz_outlined),
-            selectedIcon: Icon(Icons.more_horiz),
+            icon: _buildIcon(AppAssets.iconeMenu, false),
+            selectedIcon: _buildIcon(AppAssets.iconeMenu, true),
             label: 'Mais',
           ),
         ],

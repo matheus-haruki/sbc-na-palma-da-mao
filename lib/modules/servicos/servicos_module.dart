@@ -1,9 +1,16 @@
 import 'package:flutter_modular/flutter_modular.dart';
 
-class ServicosModule extends Module { // Altere para MaisModule no outro arquivo
+import 'presentational/controllers/servicos_cubit.dart';
+import 'presentational/ui/pages/servicos_page.dart';
+
+class ServicosModule extends Module {
   @override
-  void binds(Injector i) {}
+  void binds(Injector i) {
+    i.add<ServicosCubit>(ServicosCubit.new);
+  }
 
   @override
-  void routes(RouteManager r) {}
+  void routes(RouteManager r) {
+    r.child('/', child: (context) => const ServicosPage());
+  }
 }

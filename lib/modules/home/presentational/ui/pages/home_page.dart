@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:palma_da_mao/core/components/contact_card.dart';
+import 'package:palma_da_mao/core/components/square_button.dart';
+import 'package:palma_da_mao/core/design_system/app_assets.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart';
 
 import 'package:palma_da_mao/modules/home/presentational/controllers/home_cubit.dart';
 import 'package:palma_da_mao/modules/home/presentational/controllers/home_state.dart';
-
-
+import 'package:palma_da_mao/modules/home/presentational/ui/widgets/emergency_call_modal.dart';
+import 'package:palma_da_mao/modules/home/presentational/ui/widgets/noticias_carousel.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,18 +30,52 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Captura o tema global e o esquema de cores para reuso
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
-            title: Text(
-              'SBC na Palma da Mão',
-              style: TextStyle(
-                fontFamily: 'Parkinsans',
-                fontSize: 20,
-                fontWeight: FontWeight.w400,
-              ),),
-            floating: true,
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: 140,
+            backgroundColor: colorScheme.surface,
+            flexibleSpace: FlexibleSpaceBar(
+              background: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/icon/logo.png',
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 40.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Bom dia!\nComo podemos te ajudar hoje?',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
           SliverFillRemaining(
             child: BlocBuilder<HomeCubit, HomeState>(
@@ -44,20 +83,271 @@ class _HomePageState extends State<HomePage> {
               builder: (context, state) {
                 return switch (state) {
                   HomeInitial() || HomeLoading() => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    child: CircularProgressIndicator(),
+                  ),
                   HomeError(message: final msg) => Center(
-                      child: Text(msg),
+                    child: Text(
+                      msg,
+                      style: TextStyle(color: colorScheme.error),
                     ),
-                  HomeSuccess(atalhos: final atalhos) => ListView.builder(
-                      itemCount: atalhos.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          leading: const Icon(Icons.shortcut),
-                          title: Text(atalhos[index]),
-                        );
-                      },
+                  ),
+                  HomeSuccess(atalhos: final atalhos) => SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 2. Título da Seção
+                        Text(
+                          'Serviços Mais Utilizados',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 3. Grid de Serviços
+                        SizedBox(
+                          // A altura agora define o tamanho do card inteiro
+                          height: 120,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: atalhos.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final atalho = atalhos[index];
+
+                              return InkWell(
+                                onTap: () {},
+                                borderRadius: BorderRadius.circular(
+                                  24,
+                                ), // Borda mais arredondada conforme a imagem
+                                child: Container(
+                                  width: 110,
+                                  // O Container agora abraça o ícone E o texto
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.shadow,
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: AppColors.backgroundBlue,
+                                        ),
+                                        child: Center(
+                                          child: SvgPicture.asset(
+                                            atalho.iconePath,
+                                            width: 22,
+                                            height: 22,
+                                            colorFilter: ColorFilter.mode(
+                                              AppColors.darkBlue,
+                                              BlendMode.srcIn,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        atalho.titulo,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.labelMedium
+                                            ?.copyWith(
+                                              color: colorScheme.onSurface,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Notícias',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        //Carrossel de Notícias
+                        const NoticiasCarousel(),
+                        const SizedBox(height: 16),
+                        //Tributos e Finanças
+                        Text(
+                          'Tributos e Finanças',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 110,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: atalhos.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final atalho = atalhos[index];
+
+                              // O seu novo componente limpo e encapsulado!
+                              return SquareButton(
+                                label: atalho.titulo,
+                                iconPath: atalho.iconePath,
+                                onTap: () {
+                                  // Navegação para a rota do serviço
+                                  debugPrint('Clicou em ${atalho.titulo}');
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        //Saúde e Bem-estar
+                        Text(
+                          'Saúde e Bem-estar',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 110,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: atalhos.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final atalho = atalhos[index];
+
+                              // O seu novo componente limpo e encapsulado!
+                              return SquareButton(
+                                label: atalho.titulo,
+                                iconPath: atalho.iconePath,
+                                onTap: () {
+                                  // Navegação para a rota do serviço
+                                  debugPrint('Clicou em ${atalho.titulo}');
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        //Educação e Cultura
+                        Text(
+                          'Educação e Cultura',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 110,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: atalhos.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final atalho = atalhos[index];
+
+                              // O seu novo componente limpo e encapsulado!
+                              return SquareButton(
+                                label: atalho.titulo,
+                                iconPath: atalho.iconePath,
+                                onTap: () {
+                                  // Navegação para a rota do serviço
+                                  debugPrint('Clicou em ${atalho.titulo}');
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        //Atendimento ao Cidadão
+                        Text(
+                          'Atendimento ao Cidadão',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Linha contendo os dois cards dividindo o espaço
+                        Row(
+                          children: [
+                            // Primeiro Card (Padrão)
+                            Expanded(
+                              child: ContactCard(
+                                title: 'Fale Conosco',
+                                subtitle: 'Telefones',
+                                iconPath: AppAssets
+                                    .iconeTelefone, // Lembre-se de adicionar no app_assets.dart
+                                backgroundColor:
+                                    colorScheme.surface, // Fundo branco
+                                iconBackgroundColor: colorScheme.onSurface
+                                    .withOpacity(0.1), // Fundo cinza do ícone
+                                iconColor:
+                                    colorScheme.onSurface, // Ícone escuro
+                                onTap: () {
+                                  // Ação
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 12,
+                            ), // Espaçamento entre os cards
+                            // Segundo Card (Alerta/Emergência)
+                            Expanded(
+                              child: ContactCard(
+                                title: 'Emergências',
+                                subtitle: 'LIGAR',
+                                iconPath: AppAssets
+                                    .iconeAlerta, // Lembre-se de adicionar no app_assets.dart
+                                // A mágica do MD3: Usamos a paleta nativa de "Erro/Destrutivo"
+                                backgroundColor: colorScheme.errorContainer
+                                    .withOpacity(0.4), // Vermelho beeeem claro
+                                borderColor: colorScheme
+                                    .errorContainer, // Borda avermelhada
+                                iconBackgroundColor: colorScheme
+                                    .errorContainer, // Fundo vermelho um pouco mais forte pro ícone
+                                iconColor:
+                                    colorScheme.error, // Ícone vermelho escuro
+
+                                onTap: () {
+                                  showEmergencyCallModal(context);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30),
+                      ],
                     ),
+                  ),
                 };
               },
             ),
