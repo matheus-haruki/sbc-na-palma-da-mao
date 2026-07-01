@@ -16,4 +16,9 @@ abstract class AppAssets {
   static const String iconeMenu = '$_iconPath/menu.svg';
   static const String logo = '$_iconPath/logo.png';
   static const String iconeVoltar = '$_iconPath/return.svg';
+  static const String iconePata = '$_iconPath/paw.svg';
+  static const String iconeAltoFalante = '$_iconPath/loudspeaker.svg';
+  static const String iconeCultura = '$_iconPath/theatre.svg';
+  static const String iconePessoa = '$_iconPath/person.svg';
+  static const String iconeSaude2 = '$_iconPath/medic2.svg';
 }

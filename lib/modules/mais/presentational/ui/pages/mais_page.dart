@@ -85,6 +85,10 @@ class _MaisPageState extends State<MaisPage> {
                     context,
                     'Política de Privacidade',
                     Icons.chevron_right,
+                    onTap: () {
+                      // Navegação usando pushNamed
+                      Modular.to.pushNamed('/mais/politica-privacidade');
+                    },
                   ),
                   _buildListTile(
                     context,
@@ -121,8 +125,8 @@ class _MaisPageState extends State<MaisPage> {
   }
 
   Widget _buildListTile(
-    BuildContext context, 
-    String title, 
+    BuildContext context,
+    String title,
     IconData icon, {
     VoidCallback? onTap, // <- É este parâmetro nomeado que estava faltando!
   }) {

@@ -9,20 +9,31 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> carregarDashboard() async {
     emit(HomeLoading());
-    
+
     // Simula o tempo de requisição de uma API
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // Mapeamento dos serviços baseados nos ícones recém-adicionados
-    emit(HomeSuccess(
-      atalhos: [
-        AtalhoModel(titulo: 'Saúde', iconePath: AppAssets.iconeSaude),
-        AtalhoModel(titulo: 'Tributos', iconePath: AppAssets.iconeTributo),
-        AtalhoModel(titulo: 'Educação', iconePath: AppAssets.iconeEducacao),
-        AtalhoModel(titulo: 'Transporte', iconePath: AppAssets.iconeTransporte),
-        AtalhoModel(titulo: 'Ambiente', iconePath: AppAssets.iconeMeioAmbiente),
-        AtalhoModel(titulo: 'Alertas', iconePath: AppAssets.iconeAlerta),
-      ],
-    ));
+    emit(
+      HomeSuccess(
+        atalhos: [
+          AtalhoModel(titulo: 'Saúde', iconePath: AppAssets.iconeSaude2),
+          AtalhoModel(titulo: 'Tributos', iconePath: AppAssets.iconeTributo),
+          AtalhoModel(titulo: 'Meio-Ambiente', iconePath: AppAssets.iconePata),
+          AtalhoModel(
+            titulo: 'Fiscalização',
+            iconePath: AppAssets.iconeAltoFalante,
+          ),
+          AtalhoModel(
+            titulo: 'Cultura e Novidades',
+            iconePath: AppAssets.iconeCultura,
+          ),
+          AtalhoModel(
+            titulo: 'Cidadania e Perfil',
+            iconePath: AppAssets.iconePessoa,
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,0 +1,238 @@
+[
+    {
+        "id": "voz_da_gente",
+        "title": "A voz da gente",
+        "type": "web",
+        "url": "https://www.saobernardo.sp.gov.br/consultapublica",
+        "is_available": true
+    },
+    {
+        "id": "noticias_municipio",
+        "title": "Notícias do Município",
+        "type": "web",
+        "url": "https://www.saobernardo.sp.gov.br/noticias-do-municipio",
+        "is_available": true
+    },
+    {
+        "id": "guia_cultural",
+        "title": "Guia Cultural",
+        "type": "web",
+        "url": "https://www.saobernardo.sp.gov.br/web/cultura",
+        "is_available": true
+    },
+    {
+        "id": "grupo_iptu",
+        "title": "IPTU",
+        "type": "group",
+        "is_available": true,
+        "sub_items": [
+            {
+                "id": "iptu_segunda_via",
+                "title": "Segunda Via IPTU",
+                "type": "web",
+                "url": "https://saobernardo.sp.gov.br/segunda-via-iptu",
+                "is_available": true
+            },
+            {
+                "id": "iptu_duvidas",
+                "title": "Tire suas Dúvidas sobre IPTU",
+                "type": "native",
+                "route": "",
+                "is_available": true
+            },
+            {
+                "id": "iptu_desconto_aposentados",
+                "title": "Desconto do IPTU para Aposentados",
+                "type": "native",
+                "route": "",
+                "is_available": true
+            }
+        ]
+    },
+    {
+        "id": "saude",
+        "title": "Saúde",
+        "type": "native",
+        "route": "https://portalsaude.saobernardo.sp.gov.br/portaldasaude/sbc-palma-mao/",
+        "is_available": false
+    },
+    {
+        "id": "grupo_tributos",
+        "title": "Tributos",
+        "type": "group",
+        "is_available": true,
+        "sub_items": [
+            {
+                "id": "tributos_consultar",
+                "title": "Consultar Débitos",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/sbc/consultar-debitos",
+                "is_available": true
+            },
+            {
+                "id": "tributos_iss",
+                "title": "2ª Via de Carnê do ISS de Construção Civil",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/sbc/2-via-de-carne-do-iss-de-construcao-civil",
+                "is_available": true
+            },
+            {
+                "id": "tributos_parcelamento",
+                "title": "2ª Via de Parcelamento",
+                "type": "web",
+                "url": "https://saobernardo.sp.gov.br/2-via-de-parcelamento",
+                "is_available": true
+            },
+            {
+                "id": "tributos_alteracao_venc",
+                "title": "Alteração de Vencimento de IPTU",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/alteracao-da-data-de-vencimento-do-iptu",
+                "is_available": true
+            },
+            {
+                "id": "tributos_alteracao_cadastral",
+                "title": "Alteração Cadastral de IPTU",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/dti/alteracao-cadastral-de-iptu",
+                "is_available": true
+            }
+        ]
+    },
+    {
+        "id": "ocorrencia_animais",
+        "title": "Ocorrências com Animais",
+        "type": "native",
+        "route": "/servicos/ocorrencias-animais",
+        "is_available": true
+    },
+    {
+        "id": "vizinhos_fauna",
+        "title": "Vizinhos da Fauna",
+        "type": "web",
+        "url": "https://inventariofauna.saobernardo.sp.gov.br/inventario-fauna-silvestre/site/solicitacao/formulario-de-solicitacao",
+        "is_available": true
+    },
+    {
+        "id": "consulta_zoneamento",
+        "title": "Consulta Prévia de Zoneamento",
+        "type": "web",
+        "url": "https://geo.saobernardo.sp.gov.br/pmsbc/asp/mobile/consulta_previa_desktop.html",
+        "is_available": true
+    },
+    {
+        "id": "noite_tranquila",
+        "title": "Noite Tranquila",
+        "type": "web",
+        "url": "https://www.saobernardo.sp.gov.br/web/dti/noite-tranquila",
+        "is_available": true
+    },
+    {
+        "id": "parcelamento_conciliacao",
+        "title": "Parcelamento Câmara de Conciliação",
+        "type": "web",
+        "url": "https://transacaocamara.saobernardo.sp.gov.br/transacao-camara-de-conciliacao/formulario-para-parcelamento-de-debitos",
+        "is_available": true
+    },
+    {
+        "id": "parcelamento_normal",
+        "title": "Parcelamento Normal",
+        "type": "web",
+        "url": "https://parcelamentos.saobernardo.sp.gov.br/parcelamento-normal/formulario-para-parcelamento-de-debitos",
+        "is_available": true
+    },
+    {
+        "id": "tudo_em_dia",
+        "title": "Programa Tudo em Dia",
+        "type": "web",
+        "url": "https://www.saobernardo.sp.gov.br/orientacoes-programa-tudo-em-dia",
+        "is_available": true
+    },
+    {
+        "id": "biblioteca",
+        "title": "Biblioteca Pública",
+        "type": "web",
+        "url": "https://bibliotecapublica.saobernardo.sp.gov.br/",
+        "is_available": true
+    },
+    {
+        "id": "grupo_adocao",
+        "title": "Adote um Amigo",
+        "type": "group",
+        "is_available": true,
+        "sub_items": [
+            {
+                "id": "adocao_instrucoes",
+                "title": "Instruções para adoção",
+                "type": "native",
+                "url": "",
+                "is_available": true
+            },
+            {
+                "id": "adocao_adote",
+                "title": "Adote",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/animais-para-adocao",
+                "is_available": true
+            }
+        ]
+    },
+    {
+        "id": "grupo_iptu_premiado",
+        "title": "IPTU Premiado",
+        "type": "group",
+        "is_available": true,
+        "sub_items": [
+            {
+                "id": "iptu_premiado_pesquisa",
+                "title": "Pesquisa de cupons participantes",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/iptu-premiado/cupons",
+                "is_available": true
+            },
+            {
+                "id": "iptu_premiado_ganhadores",
+                "title": "Cupons ganhadores",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/iptu-premiado/ganhadores",
+                "is_available": true
+            }
+        ]
+    },
+    {
+        "id": "grupo_nota_premios",
+        "title": "Nota de Prêmios",
+        "type": "group",
+        "is_available": true,
+        "sub_items": [
+            {
+                "id": "nota_premios_instrucoes",
+                "title": "Instruções",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/notadepremios",
+                "is_available": true
+            },
+            {
+                "id": "nota_premios_pesquisa",
+                "title": "Pesquisa de cupons participantes",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/notadepremios/cupons",
+                "is_available": true
+            },
+            {
+                "id": "nota_premios_ganhadores",
+                "title": "Cupons ganhadores",
+                "type": "web",
+                "url": "https://www.saobernardo.sp.gov.br/web/notadepremios/ganhadores",
+                "is_available": true
+            }
+        ]
+    },
+    {
+        "id": "meus_dados_municipais",
+        "title": "Meus Dados Municipais",
+        "type": "web",
+        "url": "https://agendaeletronica.saobernardo.sp.gov.br/agenda_municipe/administracao/dadosmunicipais/lista",
+        "is_available": true
+    }
+]

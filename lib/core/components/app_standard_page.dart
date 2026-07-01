@@ -8,9 +8,7 @@ class AppStandardPage extends StatelessWidget {
   final Widget body;
   final List<Widget>? actions;
   final bool showBackButton;
-  // Opcional: Você pode passar o path do ícone por parâmetro,
-  // mas como é um Design System, recomendo chumbar o asset oficial de "voltar" aqui.
-
+  
   const AppStandardPage({
     super.key,
     required this.title,
@@ -54,12 +52,10 @@ class AppStandardPage extends StatelessWidget {
                     BlendMode.srcIn,
                   ),
                 ),
-                // IMPORTANTE: Trocamos o Modular.to.pop() pelo Navigator nativo
                 onPressed: () {
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context);
                   } else {
-                    // Fallback caso seja a única tela, para não travar o app
                     Modular.to.navigate('/home/');
                   }
                 },

@@ -13,7 +13,6 @@ class DotIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -25,9 +24,7 @@ class DotIndicator extends StatelessWidget {
           width: isActive ? 24 : 16,
           height: 6,
           decoration: BoxDecoration(
-            color: isActive
-                ? AppColors.primary
-                : colorScheme.onSurface.withOpacity(0.2),
+            color: isActive ? AppColors.primary : AppColors.inactiveIndicator,
             borderRadius: BorderRadius.circular(4),
           ),
         );

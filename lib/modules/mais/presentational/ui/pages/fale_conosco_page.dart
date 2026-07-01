@@ -10,15 +10,50 @@ class FaleConoscoPage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final List<Map<String, dynamic>> contatos = [
-      {'setor': 'Finanças', 'numero': '0800-770-3738'},
-      {'setor': 'Concursos Públicos', 'numero': '2630-4000'},
-      {'setor': 'Iluminação', 'numero': '0800-77-11159'},
-      {'setor': 'Depto. de Macrodrenagem', 'numero': '4341-8090'},
-      {'setor': 'Defesa Civil', 'numero': '199'},
-      {'setor': 'Serviço Funerário', 'numero': '4330-4527'},
-      {'setor': 'GCM - Guarda Civil Municipal', 'numero': '153'},
-      {'setor': 'Transporte Coletivo', 'numero': '0800-77-01-988'},
-      {'setor': 'Atende Bem', 'numero': '(11)2630-7350'},
+      {
+        'setor': 'Finanças',
+        'numeros': ['0800-770-3738'],
+      },
+      {
+        'setor': 'Concursos Públicos',
+        'numeros': ['2630-4000'],
+      },
+      {
+        'setor': 'Iluminação',
+        'numeros': ['0800-77-11159'],
+      },
+      {
+        'setor': 'Depto. de Macrodrenagem',
+        'numeros': ['4341-8090'],
+      },
+      {
+        'setor': 'Defesa Civil',
+        'numeros': ['199'],
+      },
+      {
+        'setor': 'Serviço Funerário',
+        'numeros': ['4330-4527'],
+      },
+      {
+        'setor': 'GCM - Guarda Civil Municipal',
+        'numeros': ['153'],
+      },
+      {
+        'setor': 'Transporte Coletivo',
+        'numeros': ['0800-77-01-988'],
+      },
+      {
+        'setor': 'Monitoramento e Fiscalização de Trânsito',
+        'numeros': ['2630-7045', '2630-7046', '2630-7047', '2630-7048'],
+      },
+      {
+        'setor': 'Serviço de Manutenção da Cidade',
+        'numeros': ['0800-7708-156'],
+      },
+      {
+        'setor': 'Atende Bem',
+        'numeros': ['(11)2630-7350'],
+      },
     ];
 
     // Chamada limpa do componente de estrutura arredondada
@@ -31,24 +66,48 @@ class FaleConoscoPage extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 24),
         itemBuilder: (context, index) {
           final contato = contatos[index];
-          
-          return RichText(
-            text: TextSpan(
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: colorScheme.primary, 
-                height: 1.5,
+          final List<String> numeros = List<String>.from(contato['numeros']);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: TextSpan(
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.primary,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: '${contato['setor']}: ',
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    if (numeros.length == 1)
+                      TextSpan(
+                        text: numeros.first,
+                        style: const TextStyle(fontWeight: FontWeight.w400),
+                      ),
+                  ],
+                ),
               ),
-              children: [
-                TextSpan(
-                  text: '${contato['setor']}: ',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+
+              if (numeros.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, top: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: numeros
+                        .map(
+                          (numero) => Text(
+                            '• $numero',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
                 ),
-                TextSpan(
-                  text: contato['numero'],
-                  style: const TextStyle(fontWeight: FontWeight.w400),
-                ),
-              ],
-            ),
+            ],
           );
         },
       ),

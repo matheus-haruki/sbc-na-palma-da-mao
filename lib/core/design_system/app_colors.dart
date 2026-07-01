@@ -9,8 +9,14 @@ abstract class AppColors {
   static const Color background = Color(0xFFF8F9FA);
   static const Color surface = Color(0xFFF8F9FA);
   static const Color backgroundBlue = Color(0xFFEEF4FD);
+  static const Color backgroundGray = Color(0xFFE1E3E4);
+  static const Color white = Color(0xFFFFFFFF);
   static const Color darkBlue = Color(0xFF003E6F);
+  static const Color lightBlue = Color(0x33A5CBFF);
   static const Color shadow = Color(0x0C000000);
+  static const Color border = Color(0xFFC1C7D2);
+  static const Color inactiveIndicator = Color(0xFFE3E5E5);
+  static const Color lightRed = Color(0x4CFF9A8F);
 
   // Cores de Texto
   static const Color textPrimary = Color(0xFF212529);

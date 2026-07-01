@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:palma_da_mao/core/components/dot_indicator.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart';
 
 // Este widget é Stateful apenas para gerenciar o próprio índice (Dot Indicator)
 class NoticiasCarousel extends StatefulWidget {
@@ -19,7 +20,6 @@ class NoticiasCarousel extends StatefulWidget {
 }
 
 class _NoticiasCarouselState extends State<NoticiasCarousel> {
-  // Controlador da página e variável para rastrear o dot ativo
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
@@ -42,7 +42,6 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
           height: 120,
           child: PageView.builder(
             controller: _pageController,
-            // Atualiza o índice do Dot Indicator ao arrastar
             onPageChanged: (index) {
               setState(() {
                 _currentIndex = index;
@@ -55,15 +54,14 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
               return Container(
                 margin: const EdgeInsets.symmetric(
                   horizontal: 4,
-                ), // Margem leve para não colar na tela se houver overflow
+                ),  
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  // Usando a cor primária do tema em vez de hexadecimal solto
                   color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: AppColors.shadow, 
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -71,14 +69,12 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                 ),
                 child: Row(
                   children: [
-                    // Círculo com ícone (Design de referência)
                     Container(
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        // Fundo branco com 15% de opacidade para dar contraste no azul
-                        color: Colors.white.withOpacity(0.15),
+                        color: AppColors.lightBlue,
                       ),
                       child: Center(
                         child: SvgPicture.asset(
@@ -86,7 +82,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                           width: 24,
                           height: 24,
                           colorFilter: const ColorFilter.mode(
-                            Colors.white,
+                            AppColors.white,
                             BlendMode.srcIn,
                           ),
                         ),
@@ -99,7 +95,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                       child: Text(
                         noticia,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white,
+                          color: AppColors.white,
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 2,
@@ -109,7 +105,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                     const SizedBox(width: 8),
 
                     // Chevron (Seta indicativa de navegação)
-                    const Icon(Icons.chevron_right, color: Colors.white),
+                    const Icon(Icons.chevron_right, color: AppColors.white),
                   ],
                 ),
               );
@@ -119,7 +115,6 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
 
         const SizedBox(height: 16),
 
-        // 2. Dot Indicators (Pill-shaped)
         DotIndicator(
           itemCount: widget.noticiasMock.length,
           currentIndex: _currentIndex,

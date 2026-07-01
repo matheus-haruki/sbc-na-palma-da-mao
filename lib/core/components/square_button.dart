@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart';
 
 class SquareButton extends StatelessWidget {
   final String label;
@@ -33,7 +34,7 @@ class SquareButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: AppColors.shadow, // Sombra sutil
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -54,16 +55,42 @@ class SquareButton extends StatelessWidget {
           const SizedBox(height: 8),
 
           // 2. O Texto Externo
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              softWrap: true,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+String breakAt12(String text) {
+  if (text.length <= 12) return text;
+
+  final words = text.split(' ');
+  String firstLine = '';
+
+  for (final word in words) {
+    final candidate = firstLine.isEmpty ? word : '$firstLine $word';
+
+    if (candidate.length > 12) break;
+
+    firstLine = candidate;
+  }
+
+  if (firstLine.isEmpty) {
+    return '${text.substring(0, 12)}\n${text.substring(12)}';
+  }
+
+  return '$firstLine\n${text.substring(firstLine.length).trim()}';
 }

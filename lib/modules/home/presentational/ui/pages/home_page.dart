@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
           SliverAppBar(
             pinned: true,
             expandedHeight: 140,
-            backgroundColor: colorScheme.surface,
+            backgroundColor: AppColors.background,
             flexibleSpace: FlexibleSpaceBar(
               background: SafeArea(
                 child: Padding(
@@ -188,16 +188,17 @@ class _HomePageState extends State<HomePage> {
                         //Carrossel de Notícias
                         const NoticiasCarousel(),
                         const SizedBox(height: 16),
-                        //Tributos e Finanças
+
+                        //Categorias de Serviços
                         Text(
-                          'Tributos e Finanças',
+                          'Categorias de Serviços',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w400,
                           ),
                         ),
                         const SizedBox(height: 16),
                         SizedBox(
-                          height: 110,
+                          height: 112,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
@@ -207,73 +208,6 @@ class _HomePageState extends State<HomePage> {
                             itemBuilder: (context, index) {
                               final atalho = atalhos[index];
 
-                              // O seu novo componente limpo e encapsulado!
-                              return SquareButton(
-                                label: atalho.titulo,
-                                iconPath: atalho.iconePath,
-                                onTap: () {
-                                  // Navegação para a rota do serviço
-                                  debugPrint('Clicou em ${atalho.titulo}');
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 16),
-
-                        //Saúde e Bem-estar
-                        Text(
-                          'Saúde e Bem-estar',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          height: 110,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: atalhos.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(width: 16),
-                            itemBuilder: (context, index) {
-                              final atalho = atalhos[index];
-
-                              // O seu novo componente limpo e encapsulado!
-                              return SquareButton(
-                                label: atalho.titulo,
-                                iconPath: atalho.iconePath,
-                                onTap: () {
-                                  // Navegação para a rota do serviço
-                                  debugPrint('Clicou em ${atalho.titulo}');
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 16),
-
-                        //Educação e Cultura
-                        Text(
-                          'Educação e Cultura',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          height: 110,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: atalhos.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(width: 16),
-                            itemBuilder: (context, index) {
-                              final atalho = atalhos[index];
-
-                              // O seu novo componente limpo e encapsulado!
                               return SquareButton(
                                 label: atalho.titulo,
                                 iconPath: atalho.iconePath,
@@ -306,10 +240,10 @@ class _HomePageState extends State<HomePage> {
                                 subtitle: 'Telefones',
                                 iconPath: AppAssets
                                     .iconeTelefone, // Lembre-se de adicionar no app_assets.dart
-                                backgroundColor:
-                                    colorScheme.surface, // Fundo branco
-                                iconBackgroundColor: colorScheme.onSurface
-                                    .withOpacity(0.1), // Fundo cinza do ícone
+                                backgroundColor: AppColors.surface,
+                                borderColor: AppColors.border,
+                                iconBackgroundColor: AppColors
+                                    .backgroundGray, // Fundo azul claro pro ícone
                                 iconColor:
                                     colorScheme.onSurface, // Ícone escuro
                                 onTap: () {
@@ -323,13 +257,12 @@ class _HomePageState extends State<HomePage> {
                             // Segundo Card (Alerta/Emergência)
                             Expanded(
                               child: ContactCard(
-                                title: 'Emergências',
+                                title: 'Emergência',
                                 subtitle: 'LIGAR',
-                                iconPath: AppAssets
-                                    .iconeAlerta, // Lembre-se de adicionar no app_assets.dart
-                                // A mágica do MD3: Usamos a paleta nativa de "Erro/Destrutivo"
-                                backgroundColor: colorScheme.errorContainer
-                                    .withOpacity(0.4), // Vermelho beeeem claro
+                                iconPath: AppAssets.iconeAlerta,
+                                backgroundColor: AppColors.lightRed.withValues(
+                                  alpha: 0.4,
+                                ),
                                 borderColor: colorScheme
                                     .errorContainer, // Borda avermelhada
                                 iconBackgroundColor: colorScheme

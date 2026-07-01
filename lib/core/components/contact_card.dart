@@ -41,10 +41,9 @@ class ContactCard extends StatelessWidget {
           border: borderColor != null
               ? Border.all(color: borderColor!, width: 1)
               : null,
-          // Uma sombra muito sutil se desejar, ou pode deixar sem como na imagem
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -52,7 +51,6 @@ class ContactCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // 1. Círculo do Ícone
             Container(
               width: 48,
               height: 48,
@@ -71,7 +69,6 @@ class ContactCard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
 
-            // 2. Textos (Expanded para não quebrar a tela se o texto for grande)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +77,7 @@ class ContactCard extends StatelessWidget {
                   Text(
                     title,
                     style: theme.textTheme.titleSmall?.copyWith(
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: theme.colorScheme.onSurface,
                     ),
