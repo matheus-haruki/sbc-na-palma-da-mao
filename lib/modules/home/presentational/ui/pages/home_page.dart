@@ -6,6 +6,7 @@ import 'package:palma_da_mao/core/components/contact_card.dart';
 import 'package:palma_da_mao/core/components/square_button.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/utils/greeting_helper.dart';
 
 import 'package:palma_da_mao/modules/home/presentational/controllers/home_cubit.dart';
 import 'package:palma_da_mao/modules/home/presentational/controllers/home_state.dart';
@@ -62,8 +63,8 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Bom dia!\nComo podemos te ajudar hoje?',
-                                style: theme.textTheme.titleMedium?.copyWith(
+                                '${GreetingHelper.getGreeting()}\nComo podemos te ajudar hoje?',
+                                style: theme.textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -110,6 +111,7 @@ class _HomePageState extends State<HomePage> {
                           // A altura agora define o tamanho do card inteiro
                           height: 120,
                           child: ListView.separated(
+                            clipBehavior: Clip.none,
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
                             itemCount: atalhos.length,
@@ -127,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                                   width: 110,
                                   // O Container agora abraça o ícone E o texto
                                   decoration: BoxDecoration(
-                                    color: colorScheme.surface,
+                                    color: AppColors.surface,
                                     borderRadius: BorderRadius.circular(24),
                                     boxShadow: [
                                       BoxShadow(
