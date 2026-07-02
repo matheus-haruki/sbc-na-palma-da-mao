@@ -1,13 +1,10 @@
 import 'package:flutter_modular/flutter_modular.dart';
 
-import 'presentational/controllers/servicos_cubit.dart';
 import 'presentational/ui/pages/servicos_page.dart';
 
 class ServicosModule extends Module {
   @override
-  void binds(Injector i) {
-    i.add<ServicosCubit>(ServicosCubit.new);
-  }
+  void binds(Injector i) {}
 
   @override
   void routes(RouteManager r) {

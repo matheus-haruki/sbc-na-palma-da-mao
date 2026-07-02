@@ -214,8 +214,14 @@ class _HomePageState extends State<HomePage> {
                                 label: atalho.titulo,
                                 iconPath: atalho.iconePath,
                                 onTap: () {
-                                  // Navegação para a rota do serviço
-                                  debugPrint('Clicou em ${atalho.titulo}');
+                                  // Dispara a navegação passando o bastão (argumentos) para a tela do Canvas
+                                  Modular.to.pushNamed(
+                                    './categoria', // O "./" mantém o usuário dentro da aba Início!
+                                    arguments: {
+                                      'titulo': atalho.titulo,
+                                      'idCategoria': atalho.idCategoria,
+                                    },
+                                  );
                                 },
                               );
                             },

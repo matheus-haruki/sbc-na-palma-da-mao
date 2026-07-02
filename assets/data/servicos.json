@@ -2,6 +2,7 @@
     {
         "id": "voz_da_gente",
         "title": "A voz da gente",
+        "categoria": "cultura",
         "type": "web",
         "url": "https://www.saobernardo.sp.gov.br/consultapublica",
         "is_available": true
@@ -9,6 +10,7 @@
     {
         "id": "noticias_municipio",
         "title": "Notícias do Município",
+        "categoria": "cultura",
         "type": "web",
         "url": "https://www.saobernardo.sp.gov.br/noticias-do-municipio",
         "is_available": true
@@ -16,6 +18,7 @@
     {
         "id": "guia_cultural",
         "title": "Guia Cultural",
+        "categoria": "cultura",
         "type": "web",
         "url": "https://www.saobernardo.sp.gov.br/web/cultura",
         "is_available": true
@@ -23,6 +26,7 @@
     {
         "id": "grupo_iptu",
         "title": "IPTU",
+        "categoria": "tributos",
         "type": "group",
         "is_available": true,
         "sub_items": [
@@ -52,6 +56,7 @@
     {
         "id": "saude",
         "title": "Saúde",
+        "categoria": "saude",
         "type": "native",
         "route": "https://portalsaude.saobernardo.sp.gov.br/portaldasaude/sbc-palma-mao/",
         "is_available": false
@@ -59,6 +64,7 @@
     {
         "id": "grupo_tributos",
         "title": "Tributos",
+        "categoria": "tributos",
         "type": "group",
         "is_available": true,
         "sub_items": [
@@ -102,6 +108,7 @@
     {
         "id": "ocorrencia_animais",
         "title": "Ocorrências com Animais",
+        "categoria": "meio_ambiente",
         "type": "native",
         "route": "/servicos/ocorrencias-animais",
         "is_available": true
@@ -109,6 +116,7 @@
     {
         "id": "vizinhos_fauna",
         "title": "Vizinhos da Fauna",
+        "categoria": "meio_ambiente",
         "type": "web",
         "url": "https://inventariofauna.saobernardo.sp.gov.br/inventario-fauna-silvestre/site/solicitacao/formulario-de-solicitacao",
         "is_available": true
@@ -116,6 +124,7 @@
     {
         "id": "consulta_zoneamento",
         "title": "Consulta Prévia de Zoneamento",
+        "categoria": "fiscalizacao",
         "type": "web",
         "url": "https://geo.saobernardo.sp.gov.br/pmsbc/asp/mobile/consulta_previa_desktop.html",
         "is_available": true
@@ -123,6 +132,7 @@
     {
         "id": "noite_tranquila",
         "title": "Noite Tranquila",
+        "categoria": "fiscalizacao",
         "type": "web",
         "url": "https://www.saobernardo.sp.gov.br/web/dti/noite-tranquila",
         "is_available": true
@@ -130,6 +140,7 @@
     {
         "id": "parcelamento_conciliacao",
         "title": "Parcelamento Câmara de Conciliação",
+        "categoria": "tributos",
         "type": "web",
         "url": "https://transacaocamara.saobernardo.sp.gov.br/transacao-camara-de-conciliacao/formulario-para-parcelamento-de-debitos",
         "is_available": true
@@ -137,6 +148,7 @@
     {
         "id": "parcelamento_normal",
         "title": "Parcelamento Normal",
+        "categoria": "tributos",
         "type": "web",
         "url": "https://parcelamentos.saobernardo.sp.gov.br/parcelamento-normal/formulario-para-parcelamento-de-debitos",
         "is_available": true
@@ -144,6 +156,7 @@
     {
         "id": "tudo_em_dia",
         "title": "Programa Tudo em Dia",
+        "categoria": "tributos",
         "type": "web",
         "url": "https://www.saobernardo.sp.gov.br/orientacoes-programa-tudo-em-dia",
         "is_available": true
@@ -151,6 +164,7 @@
     {
         "id": "biblioteca",
         "title": "Biblioteca Pública",
+        "categoria": "cultura",
         "type": "web",
         "url": "https://bibliotecapublica.saobernardo.sp.gov.br/",
         "is_available": true
@@ -158,6 +172,7 @@
     {
         "id": "grupo_adocao",
         "title": "Adote um Amigo",
+        "categoria": "meio_ambiente",
         "type": "group",
         "is_available": true,
         "sub_items": [
@@ -180,6 +195,7 @@
     {
         "id": "grupo_iptu_premiado",
         "title": "IPTU Premiado",
+        "categoria": "tributos",
         "type": "group",
         "is_available": true,
         "sub_items": [
@@ -202,6 +218,7 @@
     {
         "id": "grupo_nota_premios",
         "title": "Nota de Prêmios",
+        "categoria": "tributos",
         "type": "group",
         "is_available": true,
         "sub_items": [
@@ -231,6 +248,7 @@
     {
         "id": "meus_dados_municipais",
         "title": "Meus Dados Municipais",
+        "categoria": "cidadania",
         "type": "web",
         "url": "https://agendaeletronica.saobernardo.sp.gov.br/agenda_municipe/administracao/dadosmunicipais/lista",
         "is_available": true

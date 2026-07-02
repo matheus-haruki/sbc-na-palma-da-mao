@@ -6,10 +6,11 @@ class HomeLoading extends HomeState {}
 
 // Criamos uma classe modelo simples para segurar os dados combinados
 class AtalhoModel {
+  final String idCategoria;
   final String titulo;
   final String iconePath;
 
-  AtalhoModel({required this.titulo, required this.iconePath});
+  AtalhoModel({required this.idCategoria, required this.titulo, required this.iconePath});
 }
 
 class HomeSuccess extends HomeState {

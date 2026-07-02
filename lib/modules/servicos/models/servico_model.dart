@@ -14,6 +14,7 @@ enum ServicoType {
 class ServicoModel {
   final String id;
   final String title;
+  final String categoria;
   final ServicoType type;
   final String url;
   final String route;
@@ -23,6 +24,7 @@ class ServicoModel {
   const ServicoModel({
     required this.id,
     required this.title,
+    required this.categoria,
     required this.type,
     this.url = '',
     this.route = '',
@@ -34,6 +36,7 @@ class ServicoModel {
     return ServicoModel(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
+      categoria: json['categoria'] ?? '',
       type: ServicoType.fromString(json['type'] ?? ''),
       url: json['url'] ?? '',
       route: json['route'] ?? '',

@@ -15,18 +15,27 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  final _routes = const ['/home/', '/servicos/', '/mais/'];
+  // CORREÇÃO 1: Caminhos absolutos garantem que o Modular nunca se perca
+  final _routes = const [
+    '/main/home/', 
+    '/main/servicos/', 
+    '/main/mais/'
+  ];
 
   @override
   void initState() {
     super.initState();
-    Modular.to.navigate(_routes[_currentIndex]);
+    // CORREÇÃO 2: Removemos a navegação daqui! 
+    // A SplashPage já fez o trabalho de chamar Modular.to.navigate('/main/home');
+    // Então, quando esta tela nasce, o RouterOutlet já sabe que deve carregar o HomeModule.
   }
 
   void _onDestinationSelected(int index) {
     if (_currentIndex == index) return;
 
     setState(() => _currentIndex = index);
+    
+    // O navigate injeta a nova rota silenciosamente dentro do RouterOutlet
     Modular.to.navigate(_routes[index]);
   }
 
@@ -45,15 +54,14 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const RouterOutlet(),
+      // O RouterOutlet é o buraco negro onde os módulos filhos serão renderizados
+      body: const RouterOutlet(), 
+      
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onDestinationSelected,
         indicatorColor: Colors.transparent,
-
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-
-        // 👇 TEXTO
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
@@ -64,7 +72,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
           }
           return const TextStyle(color: Colors.grey, fontSize: 12);
         }),
-
         destinations: [
           NavigationDestination(
             icon: _buildIcon(AppAssets.iconeHome, false),
