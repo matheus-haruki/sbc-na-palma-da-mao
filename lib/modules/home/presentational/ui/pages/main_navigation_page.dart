@@ -15,27 +15,56 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  // CORREÇÃO 1: Caminhos absolutos garantem que o Modular nunca se perca
   final _routes = const [
     '/main/home/', 
     '/main/servicos/', 
     '/main/mais/'
   ];
 
+  // 1. Criamos a variável do nosso "espião" de rotas
+  late final VoidCallback _routeListener;
+
   @override
   void initState() {
     super.initState();
-    // CORREÇÃO 2: Removemos a navegação daqui! 
-    // A SplashPage já fez o trabalho de chamar Modular.to.navigate('/main/home');
-    // Então, quando esta tela nasce, o RouterOutlet já sabe que deve carregar o HomeModule.
+    
+    // 2. Ensinamos o espião o que ele deve fazer quando a rota mudar
+    _routeListener = () {
+      final String currentPath = Modular.to.path;
+      int newIndex = _currentIndex;
+
+      if (currentPath.contains('/main/home')) {
+        newIndex = 0;
+      } else if (currentPath.contains('/main/servicos')) {
+        newIndex = 1;
+      } else if (currentPath.contains('/main/mais')) {
+        newIndex = 2;
+      }
+
+      // Se o índice real for diferente do que está desenhado na tela, nós atualizamos!
+      if (newIndex != _currentIndex && mounted) {
+        setState(() {
+          _currentIndex = newIndex;
+        });
+      }
+    };
+
+    // 3. Cadastramos o espião no sistema de rotas do Modular
+    Modular.to.addListener(_routeListener);
+  }
+
+  @override
+  void dispose() {
+    // 4. Regra de ouro: sempre demitir o espião quando a tela for destruída (evita vazamento de memória)
+    Modular.to.removeListener(_routeListener);
+    super.dispose();
   }
 
   void _onDestinationSelected(int index) {
     if (_currentIndex == index) return;
-
-    setState(() => _currentIndex = index);
     
-    // O navigate injeta a nova rota silenciosamente dentro do RouterOutlet
+    // Agora só precisamos mandar navegar! O nosso Listener (espião) vai detectar a mudança 
+    // e disparar o setState alterando o _currentIndex automaticamente.
     Modular.to.navigate(_routes[index]);
   }
 
@@ -54,7 +83,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // O RouterOutlet é o buraco negro onde os módulos filhos serão renderizados
       body: const RouterOutlet(), 
       
       bottomNavigationBar: NavigationBar(

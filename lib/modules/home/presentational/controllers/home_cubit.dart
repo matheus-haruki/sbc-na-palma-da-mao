@@ -17,12 +17,58 @@ class HomeCubit extends Cubit<HomeState> {
     emit(
       HomeSuccess(
         atalhos: [
-          AtalhoModel(idCategoria: 'saude', titulo: 'Saúde', iconePath: AppAssets.iconeSaude2),
-          AtalhoModel(idCategoria: 'tributos', titulo: 'Tributos', iconePath: AppAssets.iconeTributo),
-          AtalhoModel(idCategoria: 'meio_ambiente', titulo: 'Meio-Ambiente', iconePath: AppAssets.iconePata),
-          AtalhoModel(idCategoria: 'fiscalizacao', titulo: 'Fiscalização', iconePath: AppAssets.iconeAltoFalante),
-          AtalhoModel(idCategoria: 'cultura', titulo: 'Cultura e Novidades', iconePath: AppAssets.iconeCultura),
-          AtalhoModel(idCategoria: 'cidadania', titulo: 'Cidadania e Perfil', iconePath: AppAssets.iconePessoa),
+          AtalhoModel(
+            idCategoria: 'saude',
+            titulo: 'Saúde',
+            iconePath: AppAssets.iconeSaude2,
+          ),
+          AtalhoModel(
+            idCategoria: 'tributos',
+            titulo: 'Tributos',
+            iconePath: AppAssets.iconeTributo,
+          ),
+          AtalhoModel(
+            idCategoria: 'meio_ambiente',
+            titulo: 'Meio-Ambiente',
+            iconePath: AppAssets.iconePata,
+          ),
+          AtalhoModel(
+            idCategoria: 'fiscalizacao',
+            titulo: 'Fiscalização',
+            iconePath: AppAssets.iconeAltoFalante,
+          ),
+          AtalhoModel(
+            idCategoria: 'cultura',
+            titulo: 'Cultura e Novidades',
+            iconePath: AppAssets.iconeCultura,
+          ),
+          AtalhoModel(
+            idCategoria: 'cidadania',
+            titulo: 'Cidadania e Perfil',
+            iconePath: AppAssets.iconePessoa,
+          ),
+        ],
+        maisUtilizados: [
+          AtalhoModel(
+            idCategoria:
+                'tributos', // Vai abrir a lista de Tributos (onde está o IPTU)
+            titulo: '2ª Via do IPTU',
+            iconePath: AppAssets.iconeHome,
+          ),
+          AtalhoModel(
+            idCategoria:
+                'cultura', // Vai abrir a lista de Cultura (onde colocamos as Notícias no JSON)
+            titulo: 'Notícias',
+            iconePath: AppAssets
+                .iconeJornal, // Troque se tiver um ícone específico para notícias
+          ),
+          AtalhoModel(
+            idCategoria:
+                'cidadania', // Cidadania geralmente engloba atendimento/ouvidoria
+            titulo: 'Fale Conosco',
+            iconePath: AppAssets
+                .iconeTelefone, // Troque se tiver um ícone de balão de fala/chat
+          ),
         ],
       ),
     );

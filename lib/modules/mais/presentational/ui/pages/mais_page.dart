@@ -42,8 +42,11 @@ class _MaisPageState extends State<MaisPage> {
                   Align(
                     alignment: Alignment.topRight,
                     child: IconButton(
-                      onPressed: () => Modular.to.navigate('/home/'),
                       icon: const Icon(Icons.close),
+                      onPressed: () {
+                        // Tenta navegar para a raiz absoluta do aplicativo
+                        Modular.to.navigate('/main/home');
+                      },
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -87,7 +90,7 @@ class _MaisPageState extends State<MaisPage> {
                     Icons.chevron_right,
                     onTap: () {
                       // Navegação usando pushNamed
-                      Modular.to.pushNamed('/mais/politica-privacidade');
+                      Modular.to.pushNamed('./politica-privacidade');
                     },
                   ),
                   _buildListTile(
@@ -96,7 +99,7 @@ class _MaisPageState extends State<MaisPage> {
                     Icons.chevron_right,
                     onTap: () {
                       // Navegação usando pushNamed
-                      Modular.to.pushNamed('/mais/fale-conosco');
+                      Modular.to.pushNamed('./fale-conosco');
                     },
                   ),
 

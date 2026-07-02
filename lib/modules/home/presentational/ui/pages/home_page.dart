@@ -114,20 +114,27 @@ class _HomePageState extends State<HomePage> {
                             clipBehavior: Clip.none,
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
-                            itemCount: atalhos.length,
+                            itemCount: state.maisUtilizados.length,
                             separatorBuilder: (context, index) =>
                                 const SizedBox(width: 16),
                             itemBuilder: (context, index) {
-                              final atalho = atalhos[index];
+                              // AJUSTE 1: Lendo da lista correta (maisUtilizados)
+                              final atalho = state.maisUtilizados[index];
 
                               return InkWell(
-                                onTap: () {},
-                                borderRadius: BorderRadius.circular(
-                                  24,
-                                ), // Borda mais arredondada conforme a imagem
+                                // AJUSTE 2: Adicionando a navegação
+                                onTap: () {
+                                  Modular.to.pushNamed(
+                                    './categoria',
+                                    arguments: {
+                                      'titulo': atalho.titulo,
+                                      'idCategoria': atalho.idCategoria,
+                                    },
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(24), 
                                 child: Container(
                                   width: 110,
-                                  // O Container agora abraça o ícone E o texto
                                   decoration: BoxDecoration(
                                     color: AppColors.surface,
                                     borderRadius: BorderRadius.circular(24),
@@ -146,7 +153,7 @@ class _HomePageState extends State<HomePage> {
                                       Container(
                                         width: 56,
                                         height: 56,
-                                        decoration: BoxDecoration(
+                                        decoration: const BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: AppColors.backgroundBlue,
                                         ),
@@ -155,7 +162,7 @@ class _HomePageState extends State<HomePage> {
                                             atalho.iconePath,
                                             width: 22,
                                             height: 22,
-                                            colorFilter: ColorFilter.mode(
+                                            colorFilter: const ColorFilter.mode(
                                               AppColors.darkBlue,
                                               BlendMode.srcIn,
                                             ),
@@ -178,8 +185,7 @@ class _HomePageState extends State<HomePage> {
                               );
                             },
                           ),
-                        ),
-                        SizedBox(height: 16),
+                        ),SizedBox(height: 16),
                         Text(
                           'Notícias',
                           style: theme.textTheme.titleMedium?.copyWith(

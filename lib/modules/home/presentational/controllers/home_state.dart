@@ -15,8 +15,9 @@ class AtalhoModel {
 
 class HomeSuccess extends HomeState {
   final List<AtalhoModel> atalhos; // Agora é uma lista de objetos
+  final List<AtalhoModel> maisUtilizados;
   
-  HomeSuccess({required this.atalhos});
+  HomeSuccess({required this.atalhos, required this.maisUtilizados});
 }
 
 class HomeError extends HomeState {

@@ -21,6 +21,7 @@ abstract class AppAssets {
   static const String iconeCultura = '$_iconPath/theatre.svg';
   static const String iconePessoa = '$_iconPath/person.svg';
   static const String iconeSaude2 = '$_iconPath/medic2.svg';
+  static const String iconeJornal = '$_iconPath/news.svg';
 
   static const String loadingAnimation = 'assets/lottie/loading.json';
   static const String dogAnimation = 'assets/lottie/dog.json';
