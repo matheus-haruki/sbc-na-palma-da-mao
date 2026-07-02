@@ -12,6 +12,8 @@ abstract class AppColors {
   static const Color backgroundGray = Color(0xFFE1E3E4);
   static const Color white = Color(0xFFFFFFFF);
   static const Color darkBlue = Color(0xFF003E6F);
+  static const Color gradientBlueStart = Color(0xFF1F3A5F);
+  static const Color gradientBlueEnd = Color(0xFF3C91D0);
   static const Color lightBlue = Color(0x33A5CBFF);
   static const Color shadow = Color(0x0C000000);
   static const Color border = Color(0xFFC1C7D2);

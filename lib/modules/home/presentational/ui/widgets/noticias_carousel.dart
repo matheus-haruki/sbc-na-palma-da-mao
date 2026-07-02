@@ -1,11 +1,11 @@
+import 'dart:async'; // Importação necessária para o Timer
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart'; // Importação do Lottie
+import 'package:lottie/lottie.dart';
 import 'package:palma_da_mao/core/components/dot_indicator.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
-// Lembre-se de importar o AppAssets se for usá-lo para os caminhos
 
-// 1. Criamos um modelo simples para organizar os dados da notícia
+// Modelo simples para organizar os dados da notícia
 class NoticiaItem {
   final String titulo;
   final String lottiePath;
@@ -23,13 +23,13 @@ class NoticiasCarousel extends StatefulWidget {
 class _NoticiasCarouselState extends State<NoticiasCarousel> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
+  Timer? _timer; // Variável para controlar o loop automático
 
-  // 2. Nossa nova lista de dados mockados com as mensagens e caminhos dos Lotties
+  // Lista de dados mockados com as mensagens e caminhos dos Lotties vindos do AppAssets
   final List<NoticiaItem> noticias = [
     NoticiaItem(
       titulo: 'Vacina da gripe',
-      lottiePath: AppAssets
-          .vacinaAnimation, // Ajuste para a variável do seu AppAssets se preferir
+      lottiePath: AppAssets.vacinaAnimation,
     ),
     NoticiaItem(
       titulo: 'Segunda via do IPTU',
@@ -39,7 +39,31 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    // Inicia o Timer que avança a página a cada 3 segundos
+    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+      if (_currentIndex < noticias.length - 1) {
+        _currentIndex++;
+      } else {
+        _currentIndex = 0; // Volta para o início (loop infinito)
+      }
+
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _timer
+        ?.cancel(); // Cancela o timer para evitar vazamento de memória (Memory Leak)
     _pageController.dispose();
     super.dispose();
   }
@@ -64,15 +88,17 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
             itemBuilder: (context, index) {
               final noticia = noticias[index];
 
+              // Regra matemática para alternar a posição dos itens (Pares na esquerda, Ímpares na direita)
               final bool isAnimacaoEsquerda = index % 2 == 0;
 
+              // Widget da Animação Lottie isolado
               final Widget animacaoWidget = SizedBox(
                 child: Center(
                   child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover),
                 ),
               );
 
-              // Widget do Texto isolado
+              // Widget do Texto isolado com alinhamento dinâmico
               final Widget textoWidget = Expanded(
                 child: Text(
                   noticia.titulo,
@@ -83,7 +109,6 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  // Alinha o texto dependendo de que lado ele está
                   textAlign: isAnimacaoEsquerda
                       ? TextAlign.left
                       : TextAlign.right,
@@ -97,7 +122,10 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   gradient: const RadialGradient(
                     center: Alignment(-1, 0.50),
                     radius: 4.45,
-                    colors: [const Color(0xFF1F3A5F), const Color(0xFF3C91D0)],
+                    colors: [
+                      AppColors.gradientBlueStart,
+                      AppColors.gradientBlueEnd,
+                    ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
@@ -110,6 +138,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                 ),
                 child: Row(
                   children: [
+                    // Intercala a ordem dos componentes na Row baseado no index
                     if (isAnimacaoEsquerda) ...[
                       animacaoWidget,
                       const SizedBox(width: 16),
@@ -131,6 +160,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
 
         const SizedBox(height: 16),
 
+        // Indicador de bolinhas sincronizado com o PageView
         DotIndicator(itemCount: noticias.length, currentIndex: _currentIndex),
       ],
     );
