@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart'; // Importação do Lottie
 import 'package:palma_da_mao/core/components/dot_indicator.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+// Lembre-se de importar o AppAssets se for usá-lo para os caminhos
 
-// Este widget é Stateful apenas para gerenciar o próprio índice (Dot Indicator)
+// 1. Criamos um modelo simples para organizar os dados da notícia
+class NoticiaItem {
+  final String titulo;
+  final String lottiePath;
+
+  NoticiaItem({required this.titulo, required this.lottiePath});
+}
+
 class NoticiasCarousel extends StatefulWidget {
-  // Futuramente, esta lista virá do HomeCubit
-  final List<String> noticiasMock = const [
-    'Campanha de Vacinação Contra a Gripe - Saiba onde se vacinar',
-    'Novas vagas de emprego abertas no portal do cidadão',
-    'Manutenção na rede de água: veja os bairros afetados',
-  ];
-
   const NoticiasCarousel({super.key});
 
   @override
@@ -23,6 +24,20 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
 
+  // 2. Nossa nova lista de dados mockados com as mensagens e caminhos dos Lotties
+  final List<NoticiaItem> noticias = [
+    NoticiaItem(
+      titulo: 'Vacina da gripe',
+      lottiePath: AppAssets
+          .vacinaAnimation, // Ajuste para a variável do seu AppAssets se preferir
+    ),
+    NoticiaItem(
+      titulo: 'Segunda via do IPTU',
+      lottiePath: AppAssets.iptuAnimation,
+    ),
+    NoticiaItem(titulo: 'Adote um amigo', lottiePath: AppAssets.dogAnimation),
+  ];
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -32,14 +47,12 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 1. Área do Carrossel (Cards)
         SizedBox(
-          height: 120,
+          height: 115,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) {
@@ -47,21 +60,49 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                 _currentIndex = index;
               });
             },
-            itemCount: widget.noticiasMock.length,
+            itemCount: noticias.length,
             itemBuilder: (context, index) {
-              final noticia = widget.noticiasMock[index];
+              final noticia = noticias[index];
+
+              final bool isAnimacaoEsquerda = index % 2 == 0;
+
+              final Widget animacaoWidget = SizedBox(
+                child: Center(
+                  child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover),
+                ),
+              );
+
+              // Widget do Texto isolado
+              final Widget textoWidget = Expanded(
+                child: Text(
+                  noticia.titulo,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  // Alinha o texto dependendo de que lado ele está
+                  textAlign: isAnimacaoEsquerda
+                      ? TextAlign.left
+                      : TextAlign.right,
+                ),
+              );
 
               return Container(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 4,
-                ),  
-                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: const RadialGradient(
+                    center: Alignment(-1, 0.50),
+                    radius: 4.45,
+                    colors: [const Color(0xFF1F3A5F), const Color(0xFF3C91D0)],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.shadow, 
+                      color: AppColors.shadow,
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -69,42 +110,17 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.lightBlue,
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          AppAssets.iconeSaude,
-                          width: 24,
-                          height: 24,
-                          colorFilter: const ColorFilter.mode(
-                            AppColors.white,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
+                    if (isAnimacaoEsquerda) ...[
+                      animacaoWidget,
+                      const SizedBox(width: 16),
+                      textoWidget,
+                    ] else ...[
+                      textoWidget,
+                      const SizedBox(width: 16),
+                      animacaoWidget,
+                    ],
 
-                    // Texto da Notícia (Expanded evita overflow no texto)
-                    Expanded(
-                      child: Text(
-                        noticia,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
                     const SizedBox(width: 8),
-
-                    // Chevron (Seta indicativa de navegação)
                     const Icon(Icons.chevron_right, color: AppColors.white),
                   ],
                 ),
@@ -115,10 +131,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
 
         const SizedBox(height: 16),
 
-        DotIndicator(
-          itemCount: widget.noticiasMock.length,
-          currentIndex: _currentIndex,
-        ),
+        DotIndicator(itemCount: noticias.length, currentIndex: _currentIndex),
       ],
     );
   }

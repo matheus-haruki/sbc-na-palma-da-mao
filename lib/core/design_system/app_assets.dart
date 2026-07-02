@@ -23,4 +23,7 @@ abstract class AppAssets {
   static const String iconeSaude2 = '$_iconPath/medic2.svg';
 
   static const String loadingAnimation = 'assets/lottie/loading.json';
+  static const String dogAnimation = 'assets/lottie/dog.json';
+  static const String vacinaAnimation = 'assets/lottie/vacina.json';
+  static const String iptuAnimation = 'assets/lottie/iptu.json';
 }
