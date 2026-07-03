@@ -6,6 +6,7 @@ import 'package:palma_da_mao/core/components/contact_card.dart';
 import 'package:palma_da_mao/core/components/square_button.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/utils/app_browser_navigator.dart';
 import 'package:palma_da_mao/core/utils/greeting_helper.dart';
 
 import 'package:palma_da_mao/modules/home/presentational/controllers/home_cubit.dart';
@@ -118,21 +119,35 @@ class _HomePageState extends State<HomePage> {
                             separatorBuilder: (context, index) =>
                                 const SizedBox(width: 16),
                             itemBuilder: (context, index) {
-                              // AJUSTE 1: Lendo da lista correta (maisUtilizados)
                               final atalho = state.maisUtilizados[index];
 
                               return InkWell(
                                 // AJUSTE 2: Adicionando a navegação
                                 onTap: () {
-                                  Modular.to.pushNamed(
-                                    './categoria',
-                                    arguments: {
-                                      'titulo': atalho.titulo,
-                                      'idCategoria': atalho.idCategoria,
-                                    },
-                                  );
+                                  if (atalho.url != null &&
+                                      atalho.url!.isNotEmpty) {
+                                    AppBrowserNavigator.openWebPage(
+                                      context: context,
+                                      urlString: atalho.url!,
+                                    );
+                                  }
+                                  // 2. Se tiver Rota, navega dentro do app
+                                  else if (atalho.rota != null &&
+                                      atalho.rota!.isNotEmpty) {
+                                    Modular.to.pushNamed(atalho.rota!);
+                                  }
+                                  // 3. Se não tiver nenhum dos dois, funciona como Categoria normal
+                                  else {
+                                    Modular.to.pushNamed(
+                                      './categoria',
+                                      arguments: {
+                                        'titulo': atalho.titulo,
+                                        'idCategoria': atalho.idCategoria,
+                                      },
+                                    );
+                                  }
                                 },
-                                borderRadius: BorderRadius.circular(24), 
+                                borderRadius: BorderRadius.circular(24),
                                 child: Container(
                                   width: 110,
                                   decoration: BoxDecoration(
@@ -185,7 +200,8 @@ class _HomePageState extends State<HomePage> {
                               );
                             },
                           ),
-                        ),SizedBox(height: 16),
+                        ),
+                        SizedBox(height: 16),
                         Text(
                           'Notícias',
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -261,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                                 iconColor:
                                     colorScheme.onSurface, // Ícone escuro
                                 onTap: () {
-                                  // Ação
+                                  Modular.to.pushNamed('./fale-conosco');
                                 },
                               ),
                             ),

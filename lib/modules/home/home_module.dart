@@ -1,4 +1,5 @@
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:palma_da_mao/modules/mais/presentational/ui/pages/fale_conosco_page.dart';
 import 'presentational/controllers/home_cubit.dart';
 import 'presentational/ui/pages/home_page.dart';
 // ADICIONE ESTE IMPORT
@@ -13,6 +14,7 @@ class HomeModule extends Module {
   @override
   void routes(RouteManager r) {
     r.child('/', child: (context) => const HomePage());
+    r.child('/fale-conosco', child: (context) => const FaleConoscoPage());
     
     r.child('/categoria', child: (context) => CategoriaDetalhePage(
       titulo: r.args.data['titulo'],

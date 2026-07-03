@@ -54,6 +54,7 @@ class HomeCubit extends Cubit<HomeState> {
                 'tributos', // Vai abrir a lista de Tributos (onde está o IPTU)
             titulo: '2ª Via do IPTU',
             iconePath: AppAssets.iconeHome,
+            url: 'https://saobernardo.sp.gov.br/segunda-via-iptu',
           ),
           AtalhoModel(
             idCategoria:
@@ -61,6 +62,7 @@ class HomeCubit extends Cubit<HomeState> {
             titulo: 'Notícias',
             iconePath: AppAssets
                 .iconeJornal, // Troque se tiver um ícone específico para notícias
+            url: 'https://saobernardo.sp.gov.br/noticias-do-municipio',
           ),
           AtalhoModel(
             idCategoria:
@@ -68,6 +70,7 @@ class HomeCubit extends Cubit<HomeState> {
             titulo: 'Fale Conosco',
             iconePath: AppAssets
                 .iconeTelefone, // Troque se tiver um ícone de balão de fala/chat
+            rota: './fale-conosco',
           ),
         ],
       ),

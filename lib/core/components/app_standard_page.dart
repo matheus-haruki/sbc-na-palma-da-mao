@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:palma_da_mao/core/design_system/app_assets.dart'; // Importe caso vá usar Modular.to.pop()
+import 'package:palma_da_mao/core/design_system/app_assets.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart'; // Importe caso vá usar Modular.to.pop()
 
 class AppStandardPage extends StatelessWidget {
   final String title;
   final Widget body;
   final List<Widget>? actions;
   final bool showBackButton;
-  
+
   const AppStandardPage({
     super.key,
     required this.title,
@@ -23,30 +24,39 @@ class AppStandardPage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: colorScheme.primary,
+      backgroundColor: AppColors.secondary,
       appBar: AppBar(
-        title: Text(
-          title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: colorScheme.onPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: false,
+        toolbarHeight: 75,
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
 
-        // 1. Desativa a inserção automática do ícone padrão do Flutter
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.gradientBlueStart, AppColors.darkBlue],
+            ),
+          ),
+        ),
+
+        title: Text(
+          title,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: colorScheme.onPrimary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+
         automaticallyImplyLeading: false,
 
-        // 2. Insere o nosso botão customizado no espaço 'leading'
         leading: showBackButton
             ? IconButton(
                 icon: SvgPicture.asset(
                   AppAssets.iconeVoltar,
-                  width: 24,
-                  height: 24,
+                  width: 21,
+                  height: 21,
                   colorFilter: ColorFilter.mode(
                     colorScheme.onPrimary,
                     BlendMode.srcIn,
@@ -59,7 +69,6 @@ class AppStandardPage extends StatelessWidget {
                     Modular.to.navigate('/home/');
                   }
                 },
-                tooltip: 'Voltar',
               )
             : null,
 
@@ -71,7 +80,7 @@ class AppStandardPage extends StatelessWidget {
         height: double.infinity,
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
         ),
         clipBehavior: Clip.antiAlias,
         child: body,
