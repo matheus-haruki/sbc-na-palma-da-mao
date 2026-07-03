@@ -41,14 +41,14 @@
                 "id": "iptu_duvidas",
                 "title": "Tire suas Dúvidas sobre IPTU",
                 "type": "native",
-                "route": "",
+                "route": "/main/servicos/iptu-duvidas",
                 "is_available": true
             },
             {
                 "id": "iptu_desconto_aposentados",
                 "title": "Desconto do IPTU para Aposentados",
                 "type": "native",
-                "route": "",
+                "route": "/main/servicos/iptu-aposentados",
                 "is_available": true
             }
         ]
@@ -110,7 +110,7 @@
         "title": "Ocorrências com Animais",
         "categoria": "meio_ambiente",
         "type": "native",
-        "route": "/servicos/ocorrencias-animais",
+        "route": "/main/servicos/ocorrencias-animais",
         "is_available": true
     },
     {
@@ -180,7 +180,7 @@
                 "id": "adocao_instrucoes",
                 "title": "Instruções para adoção",
                 "type": "native",
-                "url": "",
+                "route": "/main/servicos/adocao-instrucoes",
                 "is_available": true
             },
             {

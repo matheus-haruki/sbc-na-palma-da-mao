@@ -7,8 +7,6 @@ import 'package:palma_da_mao/modules/servicos/models/servico_model.dart';
 import 'package:palma_da_mao/modules/servicos/presentational/controllers/servicos_cubit.dart';
 import 'package:palma_da_mao/modules/servicos/presentational/controllers/servicos_state.dart';
 
-// Ajuste os caminhos conforme o seu projeto
-
 class ServicosPage extends StatefulWidget {
   const ServicosPage({super.key});
 
@@ -18,6 +16,9 @@ class ServicosPage extends StatefulWidget {
 
 class _ServicosPageState extends State<ServicosPage> {
   final ServicosCubit _cubit = Modular.get<ServicosCubit>();
+  
+  // 1. Variável de estado que guarda o texto digitado na pesquisa
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _ServicosPageState extends State<ServicosPage> {
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // 1. Barra de Busca Customizada (Mantida intacta)
+                // Barra de Busca Customizada
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
@@ -77,15 +78,18 @@ class _ServicosPageState extends State<ServicosPage> {
                             vertical: 14,
                           ),
                         ),
+                        // 2. Atualiza a tela toda vez que o usuário digita algo
                         onChanged: (value) {
-                          // Futuro acionamento de filtro no Cubit
+                          setState(() {
+                            _searchQuery = value;
+                          });
                         },
                       ),
                     ),
                   ),
                 ),
 
-                // 2. Tratamento de Estados para a Lista de Serviços
+                // Tratamento de Estados e Renderização da Lista
                 switch (state) {
                   ServicosInitial() ||
                   ServicosLoading() => const SliverFillRemaining(
@@ -99,22 +103,56 @@ class _ServicosPageState extends State<ServicosPage> {
                       ),
                     ),
                   ),
-                  // MUDANÇA AQUI: Recebemos a lista de ServicoModel
-                  ServicosSuccess(servicos: final servicos) =>
-                    SliverList.separated(
-                      itemCount: servicos.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        // Passamos true para isTopLevel para manter o padding lateral
-                        // da raiz da lista que você havia definido
-                        return _buildServicoItem(
-                          context,
-                          servicos[index],
-                          isTopLevel: true,
+                  ServicosSuccess(servicos: final servicos) => () {
+                      // 3. Lógica de Filtragem em Tempo Real
+                      final query = _searchQuery.trim().toLowerCase();
+
+                      final servicosFiltrados = query.isEmpty
+                          ? servicos
+                          : servicos.where((servico) {
+                              final bateuPrincipal = servico.title.toLowerCase().contains(query);
+                              final bateuSubItem = servico.subItems.any(
+                                (sub) => sub.title.toLowerCase().contains(query),
+                              );
+                              return bateuPrincipal || bateuSubItem;
+                            }).toList();
+
+                      // Se não achar nada, exibe mensagem amigável
+                      if (servicosFiltrados.isEmpty) {
+                        return SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                              child: Text(
+                                'Nenhum resultado encontrado para "$_searchQuery"',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ),
                         );
-                      },
-                    ),
+                      }
+
+                      // 4. O SliverPadding adiciona o "espaço vazio" no final da lista (bottom: 40)
+                      return SliverPadding(
+                        padding: const EdgeInsets.only(bottom: 40),
+                        sliver: SliverList.separated(
+                          itemCount: servicosFiltrados.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            return _buildServicoItem(
+                              context,
+                              servicosFiltrados[index],
+                              isTopLevel: true,
+                            );
+                          },
+                        ),
+                      );
+                    }(),
                 },
               ],
             ),
@@ -124,7 +162,7 @@ class _ServicosPageState extends State<ServicosPage> {
     );
   }
 
-  /// Constrói o item dinamicamente mantendo o seu design MD3
+  /// Constrói o item dinamicamente mantendo o design elegante de "Cards"
   Widget _buildServicoItem(
     BuildContext context,
     ServicoModel servico, {
@@ -133,28 +171,17 @@ class _ServicosPageState extends State<ServicosPage> {
     final theme = Theme.of(context);
     final isAvailable = servico.isAvailable;
 
-    // Cor do texto fica opaca se o serviço não estiver disponível
     final textColor = isAvailable
-        ? AppColors.secondary
+        ? AppColors.secondary 
         : theme.colorScheme.outline;
 
-    // Se for um GRUPO, renderiza o seu ExpansionTile estilizado
     if (servico.type == ServicoType.group) {
       final expansionTile = Theme(
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          collapsedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide.none,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide.none,
-          ),
           iconColor: AppColors.secondary,
-          backgroundColor: AppColors.background,
-          collapsedBackgroundColor: AppColors.background,
           collapsedIconColor: AppColors.secondary,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
           title: Text(
             servico.title,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -162,30 +189,42 @@ class _ServicosPageState extends State<ServicosPage> {
               color: textColor,
             ),
           ),
-          // Recursividade: renderiza os subitens dentro do grupo (isTopLevel = false)
-          children: servico.subItems
-              .map(
-                (subItem) =>
-                    _buildServicoItem(context, subItem, isTopLevel: false),
-              )
-              .toList(),
+          children: servico.subItems.map((subItem) {
+            return Column(
+              children: [
+                _buildServicoItem(context, subItem, isTopLevel: false),
+                if (subItem != servico.subItems.last)
+                  Divider(
+                    height: 1,
+                    indent: 32,
+                    endIndent: 16,
+                    color: Colors.grey.shade100,
+                  ),
+              ],
+            );
+          }).toList(),
         ),
       );
 
       return isTopLevel
           ? Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: expansionTile,
+              child: _buildCardContainer(expansionTile),
             )
           : expansionTile;
     }
 
-    // Se for WEB ou NATIVO, renderiza o ListTile
     final listTile = ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: isTopLevel ? 24 : 32),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: isTopLevel ? 16 : 32,
+        vertical: isTopLevel ? 2 : 0,
+      ),
       title: Text(
         servico.title,
-        style: theme.textTheme.titleMedium?.copyWith(color: textColor),
+        style: (isTopLevel ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
+          color: isTopLevel ? textColor : textColor.withOpacity(0.85),
+          fontWeight: isTopLevel ? FontWeight.w600 : FontWeight.w500,
+        ),
       ),
       trailing: _getTrailingIcon(servico),
       onTap: isAvailable
@@ -193,22 +232,32 @@ class _ServicosPageState extends State<ServicosPage> {
           : () => _mostrarAvisoIndisponivel(context),
     );
 
-    // Se um item web/nativo estiver solto na raiz (fora de grupo), colocamos um fundo nele
-    // para bater com o design arredondado que você fez no ExpansionTile
-    if (isTopLevel) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: listTile,
-        ),
-      );
-    }
+    return isTopLevel
+        ? Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: _buildCardContainer(listTile),
+          )
+        : listTile;
+  }
 
-    return listTile;
+  /// Caixa de estilo (fundo branco, borda arredondada, sombra suave)
+  Widget _buildCardContainer(Widget child) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
   }
 
   /// Retorna o ícone correto dependendo do tipo do serviço
@@ -221,14 +270,14 @@ class _ServicosPageState extends State<ServicosPage> {
     }
     if (servico.type == ServicoType.web) {
       return const Icon(
-        Icons.open_in_browser,
+        Icons.open_in_new, 
         size: 18,
         color: AppColors.secondary,
       );
     }
     return const Icon(
-      Icons.arrow_forward_ios,
-      size: 14,
+      Icons.chevron_right,
+      size: 18,
       color: AppColors.secondary,
     );
   }
@@ -258,8 +307,8 @@ class _ServicosPageState extends State<ServicosPage> {
   }
 
   void _mostrarAviso(BuildContext context, String mensagem) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(mensagem)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensagem)),
+    );
   }
 }

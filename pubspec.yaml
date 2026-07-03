@@ -54,6 +54,7 @@ flutter:
     - assets/icon/
     - assets/data/
     - assets/lottie/
+    - assets/image/
 
   fonts:
     - family: Parkinsans

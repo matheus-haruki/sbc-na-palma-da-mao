@@ -1,16 +1,23 @@
-import 'dart:async'; // Importação necessária para o Timer
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart'; // Import do Modular
 import 'package:lottie/lottie.dart';
 import 'package:palma_da_mao/core/components/dot_indicator.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/utils/app_browser_navigator.dart'; // Import do navegador nativo
 
-// Modelo simples para organizar os dados da notícia
+// 1. Modelo atualizado para receber a ação de clique (onTap)
 class NoticiaItem {
   final String titulo;
   final String lottiePath;
+  final void Function(BuildContext) onTap; // Ação específica de cada notícia
 
-  NoticiaItem({required this.titulo, required this.lottiePath});
+  NoticiaItem({
+    required this.titulo,
+    required this.lottiePath,
+    required this.onTap,
+  });
 }
 
 class NoticiasCarousel extends StatefulWidget {
@@ -23,31 +30,54 @@ class NoticiasCarousel extends StatefulWidget {
 class _NoticiasCarouselState extends State<NoticiasCarousel> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
-  Timer? _timer; // Variável para controlar o loop automático
+  Timer? _timer;
 
-  // Lista de dados mockados com as mensagens e caminhos dos Lotties vindos do AppAssets
-  final List<NoticiaItem> noticias = [
+  // 2. Lista atualizada com as navegações exatas que você solicitou
+  late final List<NoticiaItem> noticias = [
     NoticiaItem(
       titulo: 'Vacina da gripe',
       lottiePath: AppAssets.vacinaAnimation,
+      onTap: (context) {
+        // Navega para a categoria detalhe de saúde
+        Modular.to.pushNamed(
+          './categoria', // Ajuste a rota relativa conforme a sua Home
+          arguments: {
+            'titulo': 'Saúde',
+            'idCategoria': 'saude',
+          },
+        );
+      },
     ),
     NoticiaItem(
       titulo: 'Segunda via do IPTU',
       lottiePath: AppAssets.iptuAnimation,
+      onTap: (context) {
+        // Abre o link web da 2ª via do IPTU
+        AppBrowserNavigator.openWebPage(
+          context: context,
+          urlString: 'https://saobernardo.sp.gov.br/segunda-via-iptu',
+        );
+      },
     ),
-    NoticiaItem(titulo: 'Adote um amigo', lottiePath: AppAssets.dogAnimation),
+    NoticiaItem(
+      titulo: 'Adote um amigo',
+      lottiePath: AppAssets.dogAnimation,
+      onTap: (context) {
+        // Navega para a tela nativa de instruções de adoção
+        Modular.to.pushNamed('/main/servicos/adocao-instrucoes');
+      },
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
 
-    // Inicia o Timer que avança a página a cada 3 segundos
     _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
       if (_currentIndex < noticias.length - 1) {
         _currentIndex++;
       } else {
-        _currentIndex = 0; // Volta para o início (loop infinito)
+        _currentIndex = 0;
       }
 
       if (_pageController.hasClients) {
@@ -62,8 +92,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
 
   @override
   void dispose() {
-    _timer
-        ?.cancel(); // Cancela o timer para evitar vazamento de memória (Memory Leak)
+    _timer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -88,17 +117,14 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
             itemBuilder: (context, index) {
               final noticia = noticias[index];
 
-              // Regra matemática para alternar a posição dos itens (Pares na esquerda, Ímpares na direita)
               final bool isAnimacaoEsquerda = index % 2 == 0;
 
-              // Widget da Animação Lottie isolado
               final Widget animacaoWidget = SizedBox(
                 child: Center(
                   child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover),
                 ),
               );
 
-              // Widget do Texto isolado com alinhamento dinâmico
               final Widget textoWidget = Expanded(
                 child: Text(
                   noticia.titulo,
@@ -109,58 +135,55 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: isAnimacaoEsquerda
-                      ? TextAlign.left
-                      : TextAlign.right,
+                  textAlign: isAnimacaoEsquerda ? TextAlign.left : TextAlign.right,
                 ),
               );
 
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  gradient: const RadialGradient(
-                    center: Alignment(-1, 0.50),
-                    radius: 4.45,
-                    colors: [
-                      AppColors.gradientBlueStart,
-                      AppColors.gradientBlueEnd,
+              // 3. Adicionamos o GestureDetector para capturar o clique no Card
+              return GestureDetector(
+                onTap: () => noticia.onTap(context),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const RadialGradient(
+                      center: Alignment(-1, 0.50),
+                      radius: 4.45,
+                      colors: [
+                        AppColors.gradientBlueStart,
+                        AppColors.gradientBlueEnd,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadow,
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.shadow,
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    // Intercala a ordem dos componentes na Row baseado no index
-                    if (isAnimacaoEsquerda) ...[
-                      animacaoWidget,
-                      const SizedBox(width: 16),
-                      textoWidget,
-                    ] else ...[
-                      textoWidget,
-                      const SizedBox(width: 16),
-                      animacaoWidget,
+                  child: Row(
+                    children: [
+                      if (isAnimacaoEsquerda) ...[
+                        animacaoWidget,
+                        const SizedBox(width: 16),
+                        textoWidget,
+                      ] else ...[
+                        textoWidget,
+                        const SizedBox(width: 16),
+                        animacaoWidget,
+                      ],
+                      const SizedBox(width: 8),
+                      const Icon(Icons.chevron_right, color: AppColors.white),
                     ],
-
-                    const SizedBox(width: 8),
-                    const Icon(Icons.chevron_right, color: AppColors.white),
-                  ],
+                  ),
                 ),
               );
             },
           ),
         ),
-
         const SizedBox(height: 16),
-
-        // Indicador de bolinhas sincronizado com o PageView
         DotIndicator(itemCount: noticias.length, currentIndex: _currentIndex),
       ],
     );
