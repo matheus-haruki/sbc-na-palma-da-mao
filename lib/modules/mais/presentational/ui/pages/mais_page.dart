@@ -1,4 +1,3 @@
-// lib/modules/mais/presentational/ui/pages/mais_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -51,39 +50,6 @@ class _MaisPageState extends State<MaisPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  ListTile(
-                    title: Text(
-                      'Tema: ${state.isDarkMode ? "Escuro" : "Claro"}',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                    trailing: Transform.scale(
-                      scale: 0.85, // ajuste esse valor para o tamanho desejado
-                      child: Switch(
-                        value: state.isDarkMode,
-                        onChanged: _cubit.toggleTheme,
-                        materialTapTargetSize: MaterialTapTargetSize
-                            .shrinkWrap, // remove a área extra de toque
-                        trackOutlineColor: const WidgetStatePropertyAll(
-                          Colors.transparent,
-                        ),
-                        trackColor: WidgetStateProperty.resolveWith<Color>((
-                          states,
-                        ) {
-                          if (states.contains(WidgetState.selected)) {
-                            return AppColors.secondary;
-                          }
-                          return AppColors.primary;
-                        }),
-                        thumbColor: WidgetStateProperty.resolveWith<Color>((
-                          states,
-                        ) {
-                          return AppColors.surface;
-                        }),
-                      ),
-                    ),
-                  ),
                   _buildListTile(
                     context,
                     'Política de Privacidade',
