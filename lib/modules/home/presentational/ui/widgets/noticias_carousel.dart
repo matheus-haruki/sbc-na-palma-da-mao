@@ -35,28 +35,17 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
   // 2. Lista atualizada com as navegações exatas que você solicitou
   late final List<NoticiaItem> noticias = [
     NoticiaItem(
-      titulo: 'Vacina da gripe',
+      titulo: 'Campanha de vacinação',
       lottiePath: AppAssets.vacinaAnimation,
       onTap: (context) {
-        // Navega para a categoria detalhe de saúde
-        Modular.to.pushNamed(
-          './categoria', // Ajuste a rota relativa conforme a sua Home
-          arguments: {
-            'titulo': 'Saúde',
-            'idCategoria': 'saude',
-          },
-        );
+        Modular.to.pushNamed('./vacinacao');
       },
     ),
     NoticiaItem(
       titulo: 'Segunda via do IPTU',
       lottiePath: AppAssets.iptuAnimation,
       onTap: (context) {
-        // Abre o link web da 2ª via do IPTU
-        AppBrowserNavigator.openWebPage(
-          context: context,
-          urlString: 'https://saobernardo.sp.gov.br/segunda-via-iptu',
-        );
+        Modular.to.pushNamed('/iptu');
       },
     ),
     NoticiaItem(
@@ -135,7 +124,9 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: isAnimacaoEsquerda ? TextAlign.left : TextAlign.right,
+                  textAlign: isAnimacaoEsquerda
+                      ? TextAlign.left
+                      : TextAlign.right,
                 ),
               );
 

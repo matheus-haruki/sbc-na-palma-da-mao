@@ -39,7 +39,7 @@ class OcorrenciasAnimaisPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             sliver: SliverList.separated(
               itemCount: ocorrencias.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final item = ocorrencias[index];
 
@@ -204,7 +204,7 @@ class OcorrenciasAnimaisPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                   sliver: SliverList.separated(
                     itemCount: item.conteudo.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    separatorBuilder: (_, _) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
                       final bloco = item.conteudo[index];
 

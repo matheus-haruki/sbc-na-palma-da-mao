@@ -16,7 +16,7 @@ class ServicosPage extends StatefulWidget {
 
 class _ServicosPageState extends State<ServicosPage> {
   final ServicosCubit _cubit = Modular.get<ServicosCubit>();
-  
+
   // 1. Variável de estado que guarda o texto digitado na pesquisa
   String _searchQuery = '';
 
@@ -104,55 +104,59 @@ class _ServicosPageState extends State<ServicosPage> {
                     ),
                   ),
                   ServicosSuccess(servicos: final servicos) => () {
-                      // 3. Lógica de Filtragem em Tempo Real
-                      final query = _searchQuery.trim().toLowerCase();
+                    // 3. Lógica de Filtragem em Tempo Real
+                    final query = _searchQuery.trim().toLowerCase();
 
-                      final servicosFiltrados = query.isEmpty
-                          ? servicos
-                          : servicos.where((servico) {
-                              final bateuPrincipal = servico.title.toLowerCase().contains(query);
-                              final bateuSubItem = servico.subItems.any(
-                                (sub) => sub.title.toLowerCase().contains(query),
-                              );
-                              return bateuPrincipal || bateuSubItem;
-                            }).toList();
+                    final servicosFiltrados = query.isEmpty
+                        ? servicos
+                        : servicos.where((servico) {
+                            final bateuPrincipal = servico.title
+                                .toLowerCase()
+                                .contains(query);
+                            final bateuSubItem = servico.subItems.any(
+                              (sub) => sub.title.toLowerCase().contains(query),
+                            );
+                            return bateuPrincipal || bateuSubItem;
+                          }).toList();
 
-                      // Se não achar nada, exibe mensagem amigável
-                      if (servicosFiltrados.isEmpty) {
-                        return SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                              child: Text(
-                                'Nenhum resultado encontrado para "$_searchQuery"',
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                    // Se não achar nada, exibe mensagem amigável
+                    if (servicosFiltrados.isEmpty) {
+                      return SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24.0,
+                            ),
+                            child: Text(
+                              'Nenhum resultado encontrado para "$_searchQuery"',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ),
-                        );
-                      }
-
-                      // 4. O SliverPadding adiciona o "espaço vazio" no final da lista (bottom: 40)
-                      return SliverPadding(
-                        padding: const EdgeInsets.only(bottom: 40),
-                        sliver: SliverList.separated(
-                          itemCount: servicosFiltrados.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            return _buildServicoItem(
-                              context,
-                              servicosFiltrados[index],
-                              isTopLevel: true,
-                            );
-                          },
                         ),
                       );
-                    }(),
+                    }
+
+                    // 4. O SliverPadding adiciona o "espaço vazio" no final da lista (bottom: 40)
+                    return SliverPadding(
+                      padding: const EdgeInsets.only(bottom: 40),
+                      sliver: SliverList.separated(
+                        itemCount: servicosFiltrados.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          return _buildServicoItem(
+                            context,
+                            servicosFiltrados[index],
+                            isTopLevel: true,
+                          );
+                        },
+                      ),
+                    );
+                  }(),
                 },
               ],
             ),
@@ -172,7 +176,7 @@ class _ServicosPageState extends State<ServicosPage> {
     final isAvailable = servico.isAvailable;
 
     final textColor = isAvailable
-        ? AppColors.secondary 
+        ? AppColors.secondary
         : theme.colorScheme.outline;
 
     if (servico.type == ServicoType.group) {
@@ -221,10 +225,14 @@ class _ServicosPageState extends State<ServicosPage> {
       ),
       title: Text(
         servico.title,
-        style: (isTopLevel ? theme.textTheme.titleMedium : theme.textTheme.bodyMedium)?.copyWith(
-          color: isTopLevel ? textColor : textColor.withOpacity(0.85),
-          fontWeight: isTopLevel ? FontWeight.w600 : FontWeight.w500,
-        ),
+        style:
+            (isTopLevel
+                    ? theme.textTheme.titleMedium
+                    : theme.textTheme.bodyMedium)
+                ?.copyWith(
+                  color: isTopLevel ? textColor : textColor.withValues(alpha: 0.85),
+                  fontWeight: isTopLevel ? FontWeight.w600 : FontWeight.w500,
+                ),
       ),
       trailing: _getTrailingIcon(servico),
       onTap: isAvailable
@@ -250,7 +258,7 @@ class _ServicosPageState extends State<ServicosPage> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -270,7 +278,7 @@ class _ServicosPageState extends State<ServicosPage> {
     }
     if (servico.type == ServicoType.web) {
       return const Icon(
-        Icons.open_in_new, 
+        Icons.open_in_new,
         size: 18,
         color: AppColors.secondary,
       );
@@ -307,8 +315,8 @@ class _ServicosPageState extends State<ServicosPage> {
   }
 
   void _mostrarAviso(BuildContext context, String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 }

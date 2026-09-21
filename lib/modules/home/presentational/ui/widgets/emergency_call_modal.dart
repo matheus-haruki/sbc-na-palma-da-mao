@@ -3,15 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:palma_da_mao/core/constants/emergency_numbers.dart';
 import 'package:palma_da_mao/services/phone_service.dart';
 
-
 class EmergencyCallModal extends StatelessWidget {
   const EmergencyCallModal({super.key});
 
   static const List<_EmergencyOption> _options = [
-    _EmergencyOption('Defesa Civil', EmergencyNumbers.defesaCivil, Icons.shield_outlined),
-    _EmergencyOption('Polícia', EmergencyNumbers.policia, Icons.local_police_outlined),
-    _EmergencyOption('SAMU', EmergencyNumbers.samu, Icons.medical_services_outlined),
-    _EmergencyOption('Bombeiros', EmergencyNumbers.bombeiros, Icons.local_fire_department_outlined),
+    _EmergencyOption(
+      'Defesa Civil',
+      EmergencyNumbers.defesaCivil,
+      Icons.shield_outlined,
+    ),
+    _EmergencyOption(
+      'Polícia',
+      EmergencyNumbers.policia,
+      Icons.local_police_outlined,
+    ),
+    _EmergencyOption(
+      'SAMU',
+      EmergencyNumbers.samu,
+      Icons.medical_services_outlined,
+    ),
+    _EmergencyOption(
+      'Bombeiros',
+      EmergencyNumbers.bombeiros,
+      Icons.local_fire_department_outlined,
+    ),
   ];
 
   @override

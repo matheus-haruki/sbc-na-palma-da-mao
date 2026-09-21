@@ -50,11 +50,10 @@ class HomeCubit extends Cubit<HomeState> {
         ],
         maisUtilizados: [
           AtalhoModel(
-            idCategoria:
-                'tributos', // Vai abrir a lista de Tributos (onde está o IPTU)
+            idCategoria: 'tributos',
             titulo: '2ª Via do IPTU',
             iconePath: AppAssets.iconeHome,
-            url: 'https://saobernardo.sp.gov.br/segunda-via-iptu',
+            rota: '/iptu',
           ),
           AtalhoModel(
             idCategoria:

@@ -21,6 +21,16 @@ dependencies:
   flutter_html: ^3.0.0
   flutter_native_splash: ^2.4.8
   lottie: ^3.4.0
+  dio: ^5.11.0
+  cached_network_image: ^3.4.1
+  stomp_dart_client: ^3.0.1
+  mask_text_input_formatter: ^2.9.0
+  shimmer: ^4.0.0
+  intl: ^0.20.3
+  pdf: ^3.13.0
+  share_plus: ^13.3.0
+  path_provider: ^2.1.6
+  printing: ^5.15.0
 
 dev_dependencies:
   flutter_test:

@@ -4,10 +4,6 @@ import 'package:palma_da_mao/modules/splash/presentational/pages/splash_page.dar
 class SplashModule extends Module {
   @override
   void routes(RouteManager r) {
-    r.child(
-      '/',
-      child: (context) => const SplashPage(),
-    );
+    r.child('/', child: (context) => const SplashPage());
   }
 }
- 

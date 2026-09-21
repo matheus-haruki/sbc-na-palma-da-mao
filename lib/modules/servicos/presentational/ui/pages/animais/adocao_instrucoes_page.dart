@@ -45,7 +45,7 @@ class AdocaoInstrucoesPage extends StatelessWidget {
                 border: Border.all(color: Colors.grey.shade200),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
+                    color: Colors.black.withValues(alpha: 0.02),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -107,12 +107,18 @@ class AdocaoInstrucoesPage extends StatelessWidget {
               },
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.backgroundGray, // Fundo suave
                   borderRadius: BorderRadius.circular(8),
                   border: Border(
-                    left: BorderSide(color: AppColors.secondary, width: 4), // Borda lateral
+                    left: BorderSide(
+                      color: AppColors.secondary,
+                      width: 4,
+                    ), // Borda lateral
                   ),
                 ),
                 child: Row(
@@ -136,7 +142,8 @@ class AdocaoInstrucoesPage extends StatelessWidget {
                   ],
                 ),
               ),
-            ),const SizedBox(height: 40), // Respiro final
+            ),
+            const SizedBox(height: 40), // Respiro final
           ],
         ),
       ),

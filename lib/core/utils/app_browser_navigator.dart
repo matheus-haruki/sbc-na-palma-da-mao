@@ -12,7 +12,7 @@ class AppBrowserNavigator {
       if (await canLaunchUrl(url)) {
         await launchUrl(
           url,
-          mode: LaunchMode.inAppBrowserView, 
+          mode: LaunchMode.inAppBrowserView,
           browserConfiguration: const BrowserConfiguration(showTitle: true),
         );
       } else {
@@ -31,6 +31,4 @@ class AppBrowserNavigator {
   }
 }
 
-
 //TODO: Autorizar abertura de navegador externo para serviços web para o ios no info.plist
-

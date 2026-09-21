@@ -15,11 +15,7 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  final _routes = const [
-    '/main/home/', 
-    '/main/servicos/', 
-    '/main/mais/'
-  ];
+  final _routes = const ['/main/home/', '/main/servicos/', '/main/mais/'];
 
   // 1. Criamos a variável do nosso "espião" de rotas
   late final VoidCallback _routeListener;
@@ -27,7 +23,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   void initState() {
     super.initState();
-    
+
     // 2. Ensinamos o espião o que ele deve fazer quando a rota mudar
     _routeListener = () {
       final String currentPath = Modular.to.path;
@@ -62,8 +58,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   void _onDestinationSelected(int index) {
     if (_currentIndex == index) return;
-    
-    // Agora só precisamos mandar navegar! O nosso Listener (espião) vai detectar a mudança 
+
+    // Agora só precisamos mandar navegar! O nosso Listener (espião) vai detectar a mudança
     // e disparar o setState alterando o _currentIndex automaticamente.
     Modular.to.navigate(_routes[index]);
   }
@@ -83,8 +79,8 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const RouterOutlet(), 
-      
+      body: const RouterOutlet(),
+
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onDestinationSelected,

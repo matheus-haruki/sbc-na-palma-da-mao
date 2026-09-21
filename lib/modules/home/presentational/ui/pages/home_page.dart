@@ -307,7 +307,24 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // Redirecionando para a raiz do chat (que agora é a lista de tickets)
+                            Modular.to.pushNamed('/chat/');
+                          },
+                          icon: const Icon(Icons.chat_bubble_outline),
+                          label: const Text('Acessar Meus Chamados'),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(50),
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
                       ],
                     ),
                   ),

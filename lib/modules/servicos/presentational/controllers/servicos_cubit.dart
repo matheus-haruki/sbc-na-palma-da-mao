@@ -10,22 +10,23 @@ class ServicosCubit extends Cubit<ServicosState> {
 
   Future<void> carregarListaDeServicos() async {
     emit(ServicosLoading());
-    
+
     try {
       // 1. Lê o conteúdo do arquivo JSON armazenado no aplicativo
-      final String jsonString = await rootBundle.loadString('assets/data/servicos.json');
-      
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/servicos.json',
+      );
+
       // 2. Converte a String de texto em uma estrutura dinâmica do Dart (List)
       final List<dynamic> jsonList = jsonDecode(jsonString);
-      
+
       // 3. Mapeia a lista dinâmica, transformando cada item em um objeto ServicoModel
       final List<ServicoModel> servicos = jsonList
           .map((item) => ServicoModel.fromJson(item as Map<String, dynamic>))
           .toList();
-          
+
       // 4. Emite o estado de sucesso entregando a lista pronta para a View
       emit(ServicosSuccess(servicos: servicos));
-      
     } catch (e) {
       // Caso ocorra erro (ex: esqueceu de registrar o asset no pubspec ou JSON inválido)
       emit(ServicosError(message: 'Não foi possível carregar os serviços.'));

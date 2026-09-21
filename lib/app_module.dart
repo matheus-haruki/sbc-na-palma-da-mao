@@ -1,6 +1,8 @@
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:palma_da_mao/modules/chat/chat_module.dart';
 import 'package:palma_da_mao/modules/home/home_module.dart';
 import 'package:palma_da_mao/modules/home/presentational/ui/pages/main_navigation_page.dart';
+import 'package:palma_da_mao/modules/iptu/iptu_module.dart';
 import 'package:palma_da_mao/modules/mais/mais_module.dart';
 import 'package:palma_da_mao/modules/servicos/presentational/controllers/servicos_cubit.dart';
 import 'package:palma_da_mao/modules/servicos/servicos_module.dart';
@@ -25,5 +27,7 @@ class AppModule extends Module {
         ModuleRoute('/mais', module: MaisModule()),
       ],
     );
+    r.module('/chat', module: ChatModule());
+    r.module('/iptu', module: IptuModule());
   }
 }

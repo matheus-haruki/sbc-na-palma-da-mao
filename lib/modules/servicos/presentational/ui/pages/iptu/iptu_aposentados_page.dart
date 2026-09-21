@@ -10,7 +10,7 @@ class IptuAposentadosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Puxando os dados específicos para aposentados
     final duvidas = IptuAposentadosMock.lista;
 
@@ -38,7 +38,10 @@ class IptuAposentadosPage extends StatelessWidget {
               ],
             ),
             child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 4,
+              ),
               title: Text(
                 item.pergunta,
                 style: theme.textTheme.titleSmall?.copyWith(
@@ -60,7 +63,11 @@ class IptuAposentadosPage extends StatelessWidget {
     );
   }
 
-  void _showRespostaBottomSheet(BuildContext context, FaqItem item, ThemeData theme) {
+  void _showRespostaBottomSheet(
+    BuildContext context,
+    FaqItem item,
+    ThemeData theme,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -108,7 +115,7 @@ class IptuAposentadosPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                   sliver: SliverList.separated(
                     itemCount: item.conteudo.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    separatorBuilder: (_, _) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
                       final bloco = item.conteudo[index];
 
@@ -121,7 +128,7 @@ class IptuAposentadosPage extends StatelessWidget {
                           ),
                         );
                       }
-                      
+
                       if (bloco is FaqImage) {
                         return InteractiveViewer(
                           panEnabled: true,

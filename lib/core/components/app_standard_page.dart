@@ -9,6 +9,7 @@ class AppStandardPage extends StatelessWidget {
   final Widget body;
   final List<Widget>? actions;
   final bool showBackButton;
+  final PreferredSizeWidget? bottom;
 
   const AppStandardPage({
     super.key,
@@ -16,6 +17,7 @@ class AppStandardPage extends StatelessWidget {
     required this.body,
     this.actions,
     this.showBackButton = true,
+    this.bottom,
   });
 
   @override
@@ -73,6 +75,7 @@ class AppStandardPage extends StatelessWidget {
             : null,
 
         actions: actions,
+        bottom: bottom,
       ),
 
       body: Container(

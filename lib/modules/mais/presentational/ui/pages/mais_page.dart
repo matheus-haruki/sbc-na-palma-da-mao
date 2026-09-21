@@ -33,8 +33,9 @@ class _MaisPageState extends State<MaisPage> {
           child: BlocBuilder<MaisCubit, MaisState>(
             bloc: _cubit,
             builder: (context, state) {
-              if (state is! MaisSuccess)
+              if (state is! MaisSuccess) {
                 return const Center(child: CircularProgressIndicator());
+              }
 
               return Column(
                 children: [

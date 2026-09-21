@@ -115,7 +115,7 @@ class IptuDuvidasPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                   sliver: SliverList.separated(
                     itemCount: item.conteudo.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    separatorBuilder: (_, _) => const SizedBox(height: 16),
                     itemBuilder: (context, index) {
                       final bloco = item.conteudo[index];
 

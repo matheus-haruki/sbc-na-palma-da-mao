@@ -6,7 +6,6 @@ class MaisCubit extends Cubit<MaisState> {
 
   void carregarConfiguracoes() {
     emit(MaisLoading());
-    // Simulação de busca de preferência de tema
     emit(MaisSuccess(isDarkMode: false));
   }
 

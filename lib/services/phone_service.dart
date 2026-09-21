@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PhoneService {
-
   static Future<bool> call(String phoneNumber) async {
     final Uri telUri = Uri(scheme: 'tel', path: phoneNumber);
 

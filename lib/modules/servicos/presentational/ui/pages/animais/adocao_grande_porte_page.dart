@@ -53,21 +53,45 @@ class AdocaoGrandePortePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSecaoTitulo(theme, 'Exigências iniciais para a adoção:'),
-          _buildItemLista(theme, 'Cópia do RG, CPF e comprovante de residência;'),
-          _buildItemLista(theme, 'Cópia autenticada da escritura da propriedade de destino do animal em área rural e ITR (Imposto Territorial Rural) atualizado.'),
-          _buildItemLista(theme, 'Cópia da Guia de Transporte Animal (GTA). A propriedade deve ser cadastrada junto à Coordenadoria de Defesa Agropecuária (CDA) do respectivo estado. O cadastro será exigido para emissão do GTA.'),
-          
+          _buildItemLista(
+            theme,
+            'Cópia do RG, CPF e comprovante de residência;',
+          ),
+          _buildItemLista(
+            theme,
+            'Cópia autenticada da escritura da propriedade de destino do animal em área rural e ITR (Imposto Territorial Rural) atualizado.',
+          ),
+          _buildItemLista(
+            theme,
+            'Cópia da Guia de Transporte Animal (GTA). A propriedade deve ser cadastrada junto à Coordenadoria de Defesa Agropecuária (CDA) do respectivo estado. O cadastro será exigido para emissão do GTA.',
+          ),
+
           const SizedBox(height: 24),
-          _buildSecaoTitulo(theme, 'Exigências do Ministério da Agricultura para emissão de GTA:'),
-          _buildItemLista(theme, 'Exames de tuberculose e brucelose, realizado por um médico veterinário cadastrado no CDA;'),
+          _buildSecaoTitulo(
+            theme,
+            'Exigências do Ministério da Agricultura para emissão de GTA:',
+          ),
+          _buildItemLista(
+            theme,
+            'Exames de tuberculose e brucelose, realizado por um médico veterinário cadastrado no CDA;',
+          ),
           _buildItemLista(theme, 'Vacinação do animal contra Febre Aftosa.'),
-          _buildItemLista(theme, 'Atestado de Saúde de que a propriedade está isenta de doença infecto contagiosa há mais de 30 dias (fornecido pelo CCZ).'),
-          _buildItemLista(theme, 'Assinatura de Termo de Responsabilidade e Propriedade (Termo emitido pela CCZ em duas vias, contendo dados dos animais). Será assinado pelo interessado ou seu procurador, com firma reconhecida, no dia da retirada do animal.'),
-          
+          _buildItemLista(
+            theme,
+            'Atestado de Saúde de que a propriedade está isenta de doença infecto contagiosa há mais de 30 dias (fornecido pelo CCZ).',
+          ),
+          _buildItemLista(
+            theme,
+            'Assinatura de Termo de Responsabilidade e Propriedade (Termo emitido pela CCZ em duas vias, contendo dados dos animais). Será assinado pelo interessado ou seu procurador, com firma reconhecida, no dia da retirada do animal.',
+          ),
+
           const SizedBox(height: 24),
           _buildSecaoTitulo(theme, 'Transporte Adequado:'),
-          _buildItemText(theme, 'Veículo apropriado para o transporte de animais de grande porte/carga viva, que deverá ser providenciado pelo proprietário.'),
-          
+          _buildItemText(
+            theme,
+            'Veículo apropriado para o transporte de animais de grande porte/carga viva, que deverá ser providenciado pelo proprietário.',
+          ),
+
           const SizedBox(height: 24),
           _buildCardInformacoesGerais(theme),
           const SizedBox(height: 24),
@@ -86,30 +110,66 @@ class AdocaoGrandePortePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSecaoTitulo(theme, 'Exigências iniciais para a adoção:'),
-          _buildItemLista(theme, 'Cópia do RG, CPF e comprovante de residência;'),
-          _buildItemLista(theme, 'Cópia autenticada da escritura da propriedade de destino do animal em área rural e ITR (Imposto Territorial Rural) atualizado.'),
-          _buildItemLista(theme, 'Cópia da Guia de transporte animal (GTA). A propriedade deve ser cadastrada junto à Coordenadoria de Defesa Agropecuária (CDA) do respectivo estado. O cadastro será exigido para emissão do GTA.'),
-          
+          _buildItemLista(
+            theme,
+            'Cópia do RG, CPF e comprovante de residência;',
+          ),
+          _buildItemLista(
+            theme,
+            'Cópia autenticada da escritura da propriedade de destino do animal em área rural e ITR (Imposto Territorial Rural) atualizado.',
+          ),
+          _buildItemLista(
+            theme,
+            'Cópia da Guia de transporte animal (GTA). A propriedade deve ser cadastrada junto à Coordenadoria de Defesa Agropecuária (CDA) do respectivo estado. O cadastro será exigido para emissão do GTA.',
+          ),
+
           const SizedBox(height: 24),
-          _buildSecaoTitulo(theme, 'Exigências do Ministério da Agricultura para emissão de GTA:'),
-          _buildItemLista(theme, 'Exames de Mormo e AIE (Anemia Infecciosa Equina), realizado por um médico veterinário cadastrado no CDA (válidos por 60 dias).'),
+          _buildSecaoTitulo(
+            theme,
+            'Exigências do Ministério da Agricultura para emissão de GTA:',
+          ),
+          _buildItemLista(
+            theme,
+            'Exames de Mormo e AIE (Anemia Infecciosa Equina), realizado por um médico veterinário cadastrado no CDA (válidos por 60 dias).',
+          ),
           _buildItemLista(theme, 'Vacinação do animal contra Influenza.'),
-          _buildItemLista(theme, 'Atestado de Saúde de que a propriedade está isenta de doença infecto contagiosa há mais de 30 dias (fornecido pelo CCZ).'),
-          _buildItemLista(theme, 'Assinatura de Termo de responsabilidade e propriedade (Termo emitido pela CCZ em duas vias contendo dados dos animais). Será assinado pelo interessado ou seu procurador, com firma reconhecida, no dia da retirada do animal.'),
-          
+          _buildItemLista(
+            theme,
+            'Atestado de Saúde de que a propriedade está isenta de doença infecto contagiosa há mais de 30 dias (fornecido pelo CCZ).',
+          ),
+          _buildItemLista(
+            theme,
+            'Assinatura de Termo de responsabilidade e propriedade (Termo emitido pela CCZ em duas vias contendo dados dos animais). Será assinado pelo interessado ou seu procurador, com firma reconhecida, no dia da retirada do animal.',
+          ),
+
           const SizedBox(height: 24),
           _buildSecaoTitulo(theme, 'Transporte Adequado:'),
-          _buildItemText(theme, 'Veículo apropriado para o transporte de animais de grande porte/carga viva, que deverá ser providenciado pelo proprietário.'),
-          
+          _buildItemText(
+            theme,
+            'Veículo apropriado para o transporte de animais de grande porte/carga viva, que deverá ser providenciado pelo proprietário.',
+          ),
+
           const SizedBox(height: 24),
           _buildCardInformacoesGerais(theme),
-          
+
           const SizedBox(height: 24),
           _buildSecaoTitulo(theme, 'Legislação aplicável:'),
-          _buildItemLegislacao(theme, 'Art. 333 - Decreto Estadual 12.342/78', '"Novas instalações de estábulos, cocheiras, granjas avícolas e estabelecimentos congêneres, só serão permitidas na zona rural".'),
-          _buildItemLegislacao(theme, 'Art. 338 - Decreto Estadual 12.342/78', '"Novas instalações de estábulos, cocheiras, granjas avícolas e estabelecimentos congêneres devem ficar à distância mínima de 50 (cinquenta) metros dos limites dos terrenos vizinhos e das faixas de domínio das estradas".'),
-          _buildItemLegislacao(theme, 'Art. 339 - Decreto Estadual 12.342/78', '"Os estábulos, cocheiras, granjas avícolas e estabelecimentos congêneres, não beneficiados pelos sistemas públicos de água e esgoto, ficam obrigados a adotar medidas a serem aprovadas pelas autoridades sanitárias no que concerne à provisão de água e à disposição dos resíduos sólidos e líquidos".'),
-          
+          _buildItemLegislacao(
+            theme,
+            'Art. 333 - Decreto Estadual 12.342/78',
+            '"Novas instalações de estábulos, cocheiras, granjas avícolas e estabelecimentos congêneres, só serão permitidas na zona rural".',
+          ),
+          _buildItemLegislacao(
+            theme,
+            'Art. 338 - Decreto Estadual 12.342/78',
+            '"Novas instalações de estábulos, cocheiras, granjas avícolas e estabelecimentos congêneres devem ficar à distância mínima de 50 (cinquenta) metros dos limites dos terrenos vizinhos e das faixas de domínio das estradas".',
+          ),
+          _buildItemLegislacao(
+            theme,
+            'Art. 339 - Decreto Estadual 12.342/78',
+            '"Os estábulos, cocheiras, granjas avícolas e estabelecimentos congêneres, não beneficiados pelos sistemas públicos de água e esgoto, ficam obrigados a adotar medidas a serem aprovadas pelas autoridades sanitárias no que concerne à provisão de água e à disposição dos resíduos sólidos e líquidos".',
+          ),
+
           const SizedBox(height: 24),
           _buildCardLocalAdocao(theme),
         ],
@@ -146,7 +206,13 @@ class AdocaoGrandePortePage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('- ', style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold)),
+          Text(
+            '- ',
+            style: TextStyle(
+              color: AppColors.secondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           Expanded(
             child: Text(
               texto,
@@ -241,7 +307,11 @@ class AdocaoGrandePortePage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.location_on_outlined, size: 20, color: AppColors.secondary),
+              Icon(
+                Icons.location_on_outlined,
+                size: 20,
+                color: AppColors.secondary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -257,7 +327,10 @@ class AdocaoGrandePortePage extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Divisão de Veterinária e Controle de Zoonoses\nEndereço: Rua Dr. Rudge Ramos, nº 1.740 - Rudge Ramos\nTelefone: (11) 4365-3349 / 4367-3306 / 4368-8153',
-            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary, height: 1.4),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.4,
+            ),
           ),
           const Divider(height: 20),
           Text(

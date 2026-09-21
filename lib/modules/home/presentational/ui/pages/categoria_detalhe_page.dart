@@ -50,12 +50,10 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
           }
 
           if (state is ServicosSuccess) {
-            final servicosFiltrados = state.servicos
-                .where((servico) {
-                  return servico.categoria.trim().toLowerCase() == 
-                         widget.idCategoria.trim().toLowerCase();
-                })
-                .toList();
+            final servicosFiltrados = state.servicos.where((servico) {
+              return servico.categoria.trim().toLowerCase() ==
+                  widget.idCategoria.trim().toLowerCase();
+            }).toList();
 
             if (servicosFiltrados.isEmpty) {
               return Center(
@@ -72,13 +70,13 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
               itemCount: servicosFiltrados.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 // Passamos true para isTopLevel para aplicar o visual de "Card" na raiz
                 return _buildServicoItem(
-                  context, 
-                  servicosFiltrados[index], 
-                  isTopLevel: true
+                  context,
+                  servicosFiltrados[index],
+                  isTopLevel: true,
                 );
               },
             );
@@ -126,9 +124,9 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
                 // Adiciona um divisor apenas se não for o último item da lista
                 if (subItem != servico.subItems.last)
                   Divider(
-                    height: 1, 
-                    indent: 32, 
-                    endIndent: 16, 
+                    height: 1,
+                    indent: 32,
+                    endIndent: 16,
                     color: Colors.grey.shade100,
                   ),
               ],
@@ -144,15 +142,19 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
     // 2. SE FOR WEB OU NATIVO (Item clicável final): Renderiza o ListTile
     final listTile = ListTile(
       contentPadding: EdgeInsets.symmetric(
-        horizontal: isTopLevel ? 16 : 32, 
+        horizontal: isTopLevel ? 16 : 32,
         vertical: isTopLevel ? 2 : 0,
       ),
       title: Text(
         servico.title,
-        style: (isTopLevel ? theme.textTheme.titleSmall : theme.textTheme.bodyMedium)?.copyWith(
-          color: isTopLevel ? textColor : textColor.withOpacity(0.85),
-          fontWeight: isTopLevel ? FontWeight.w600 : FontWeight.w500,
-        ),
+        style:
+            (isTopLevel
+                    ? theme.textTheme.titleSmall
+                    : theme.textTheme.bodyMedium)
+                ?.copyWith(
+                  color: isTopLevel ? textColor : textColor.withValues(alpha: 0.85),
+                  fontWeight: isTopLevel ? FontWeight.w600 : FontWeight.w500,
+                ),
       ),
       trailing: _getTrailingIcon(servico),
       onTap: isAvailable
@@ -174,7 +176,7 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -231,8 +233,8 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
   }
 
   void _mostrarAviso(BuildContext context, String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem)));
   }
 }

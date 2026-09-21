@@ -6,21 +6,28 @@ class OcorrenciasAnimaisMock {
 
   static const List<FaqItem> ocorrencias = [
     FaqItem(
-      pergunta: 'Entrega voluntária de animal silvestre legalizado ou não legalizado',
+      pergunta:
+          'Entrega voluntária de animal silvestre legalizado ou não legalizado',
       conteudo: [
-        FaqText('Instruções sobre como realizar a entrega voluntária sem penalidades, dirigindo-se aos órgãos ambientais competentes... (Texto de exemplo)'),
+        FaqText(
+          'Instruções sobre como realizar a entrega voluntária sem penalidades, dirigindo-se aos órgãos ambientais competentes... (Texto de exemplo)',
+        ),
       ],
     ),
     FaqItem(
       pergunta: 'Animal silvestre ferido ou acidentado',
       conteudo: [
-        FaqText('Caso encontre um animal ferido, não tente capturá-lo. Acione imediatamente a Polícia Militar Ambiental ou o Centro de Controle de Zoonoses... (Texto de exemplo)'),
+        FaqText(
+          'Caso encontre um animal ferido, não tente capturá-lo. Acione imediatamente a Polícia Militar Ambiental ou o Centro de Controle de Zoonoses... (Texto de exemplo)',
+        ),
       ],
     ),
     FaqItem(
       pergunta: 'Animal silvestre saudável e que não oferece risco',
       conteudo: [
-        FaqText('Se o animal estiver em seu habitat ou de passagem sem causar riscos, a recomendação é apenas observar e não interferir... (Texto de exemplo)'),
+        FaqText(
+          'Se o animal estiver em seu habitat ou de passagem sem causar riscos, a recomendação é apenas observar e não interferir... (Texto de exemplo)',
+        ),
       ],
     ),
     // ... Adicione os demais itens seguindo este padrão

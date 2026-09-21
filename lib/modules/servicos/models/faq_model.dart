@@ -1,5 +1,5 @@
 abstract class FaqContent {
-  const FaqContent(); 
+  const FaqContent();
 }
 
 class FaqText extends FaqContent {
@@ -16,8 +16,5 @@ class FaqItem {
   final String pergunta;
   final List<FaqContent> conteudo;
 
-  const FaqItem({
-    required this.pergunta,
-    required this.conteudo,
-  });
+  const FaqItem({required this.pergunta, required this.conteudo});
 }
