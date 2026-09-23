@@ -310,6 +310,22 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () {
+                            Modular.to.pushNamed('/zeladoria/');
+                          },
+                          icon: const Icon(Icons.report_problem_outlined),
+                          label: const Text('Ouvidoria e Zeladoria'),
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(50),
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
                             // Redirecionando para a raiz do chat (que agora é a lista de tickets)
                             Modular.to.pushNamed('/chat/');
                           },

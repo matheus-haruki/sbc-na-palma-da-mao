@@ -7,6 +7,7 @@ import 'package:palma_da_mao/modules/mais/mais_module.dart';
 import 'package:palma_da_mao/modules/servicos/presentational/controllers/servicos_cubit.dart';
 import 'package:palma_da_mao/modules/servicos/servicos_module.dart';
 import 'package:palma_da_mao/modules/splash/splash_module.dart';
+import 'package:palma_da_mao/modules/zeladoria/zeladoria_module.dart';
 
 class AppModule extends Module {
   @override
@@ -29,5 +30,6 @@ class AppModule extends Module {
     );
     r.module('/chat', module: ChatModule());
     r.module('/iptu', module: IptuModule());
+    r.module('/zeladoria', module: ZeladoriaModule());
   }
 }

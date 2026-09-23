@@ -24,6 +24,12 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Precisamos da câmera para registrar as fotos da zeladoria.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Precisamos de acesso à galeria para anexar fotos da zeladoria.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Precisamos da sua localização para registrar onde o problema de zeladoria está ocorrendo.</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UIApplicationSceneManifest</key>

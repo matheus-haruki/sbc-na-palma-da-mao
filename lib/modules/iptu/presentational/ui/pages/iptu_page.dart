@@ -4,6 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
+import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 import 'package:palma_da_mao/modules/iptu/presentational/controllers/iptu_cubit.dart';
 import 'package:palma_da_mao/modules/iptu/presentational/controllers/iptu_state.dart';
 import 'package:palma_da_mao/modules/iptu/models/debito_model.dart';
@@ -76,40 +77,8 @@ class _IptuPageState extends State<IptuPage> {
               ),
             ),
             const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: theme.colorScheme.outlineVariant,
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadow,
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _cpfController,
-                inputFormatters: [_cpfMaskFormatter],
-                decoration: InputDecoration(
-                  hintText: '000.000.000-00',
-                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-              ),
+            CpfTextField(
+              controller: _cpfController,
             ),
             const SizedBox(height: 16),
             SizedBox(
