@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 abstract class AppTextStyles {
-  static TextTheme get textTheme => const TextTheme(
+  static TextTheme get textTheme => TextTheme(
     displayLarge: TextStyle(
       fontSize: 32,
       fontWeight: FontWeight.bold,
