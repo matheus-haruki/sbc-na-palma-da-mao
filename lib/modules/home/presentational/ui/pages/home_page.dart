@@ -32,9 +32,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Captura o tema global e o esquema de cores para reuso
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       body: CustomScrollView(
@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
           SliverAppBar(
             pinned: true,
             expandedHeight: 140,
-            backgroundColor: AppColors.background,
+            backgroundColor: isDark ? theme.scaffoldBackgroundColor : AppColors.background,
             flexibleSpace: FlexibleSpaceBar(
               background: SafeArea(
                 child: Padding(
@@ -50,7 +50,9 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     children: [
                       Image.asset(
-                        'assets/icon/logo.png',
+                        theme.brightness == Brightness.dark
+                            ? AppAssets.logoTemaEscuro
+                            : AppAssets.logo,
                         width: 90,
                         height: 90,
                         fit: BoxFit.contain,
@@ -122,7 +124,6 @@ class _HomePageState extends State<HomePage> {
                               final atalho = state.maisUtilizados[index];
 
                               return InkWell(
-                                // AJUSTE 2: Adicionando a navegação
                                 onTap: () {
                                   if (atalho.url != null &&
                                       atalho.url!.isNotEmpty) {
@@ -130,14 +131,10 @@ class _HomePageState extends State<HomePage> {
                                       context: context,
                                       urlString: atalho.url!,
                                     );
-                                  }
-                                  // 2. Se tiver Rota, navega dentro do app
-                                  else if (atalho.rota != null &&
+                                  } else if (atalho.rota != null &&
                                       atalho.rota!.isNotEmpty) {
                                     Modular.to.pushNamed(atalho.rota!);
-                                  }
-                                  // 3. Se não tiver nenhum dos dois, funciona como Categoria normal
-                                  else {
+                                  } else {
                                     Modular.to.pushNamed(
                                       './categoria',
                                       arguments: {
@@ -151,8 +148,13 @@ class _HomePageState extends State<HomePage> {
                                 child: Container(
                                   width: 110,
                                   decoration: BoxDecoration(
-                                    color: AppColors.surface,
+                                    color: isDark
+                                        ? const Color(0xFF1C1C1F)
+                                        : AppColors.surface,
                                     borderRadius: BorderRadius.circular(24),
+                                    border: isDark
+                                        ? Border.all(color: Colors.white12)
+                                        : null,
                                     boxShadow: [
                                       BoxShadow(
                                         color: AppColors.shadow,
@@ -168,17 +170,21 @@ class _HomePageState extends State<HomePage> {
                                       Container(
                                         width: 56,
                                         height: 56,
-                                        decoration: const BoxDecoration(
+                                        decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: AppColors.backgroundBlue,
+                                          color: isDark
+                                              ? const Color(0xFF2E2E32)
+                                              : AppColors.backgroundBlue,
                                         ),
                                         child: Center(
                                           child: SvgPicture.asset(
                                             atalho.iconePath,
                                             width: 22,
                                             height: 22,
-                                            colorFilter: const ColorFilter.mode(
-                                              AppColors.darkBlue,
+                                            colorFilter: ColorFilter.mode(
+                                              isDark
+                                                  ? Colors.white
+                                                  : AppColors.darkBlue,
                                               BlendMode.srcIn,
                                             ),
                                           ),
@@ -190,7 +196,9 @@ class _HomePageState extends State<HomePage> {
                                         textAlign: TextAlign.center,
                                         style: theme.textTheme.labelMedium
                                             ?.copyWith(
-                                              color: colorScheme.onSurface,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : colorScheme.onSurface,
                                               fontWeight: FontWeight.w600,
                                             ),
                                       ),
@@ -268,14 +276,17 @@ class _HomePageState extends State<HomePage> {
                               child: ContactCard(
                                 title: 'Fale Conosco',
                                 subtitle: 'Telefones',
-                                iconPath: AppAssets
-                                    .iconeTelefone, // Lembre-se de adicionar no app_assets.dart
-                                backgroundColor: AppColors.surface,
-                                borderColor: AppColors.border,
-                                iconBackgroundColor: AppColors
-                                    .backgroundGray, // Fundo azul claro pro ícone
-                                iconColor:
-                                    colorScheme.onSurface, // Ícone escuro
+                                iconPath: AppAssets.iconeTelefone,
+                                backgroundColor: isDark
+                                    ? const Color(0xFF1D1D20)
+                                    : AppColors.surface,
+                                borderColor: isDark
+                                    ? Colors.white12
+                                    : AppColors.border,
+                                iconBackgroundColor: isDark
+                                    ? const Color(0xFF2B2B2F)
+                                    : AppColors.backgroundGray,
+                                iconColor: isDark ? Colors.white : colorScheme.onSurface,
                                 onTap: () {
                                   Modular.to.pushNamed('./fale-conosco');
                                 },

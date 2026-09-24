@@ -31,13 +31,18 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(AppAssets.logo, width: 200),
+            Image.asset(
+              isDark ? AppAssets.logoTemaEscuro : AppAssets.logo,
+              width: 200,
+            ),
             Lottie.asset(
               AppAssets.loadingAnimation,
               width: 80,

@@ -18,6 +18,7 @@ class SquareButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: onTap,
@@ -25,16 +26,18 @@ class SquareButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 1. A Caixa Branca (Card do Ícone)
           Container(
-            width: 72, // Tamanho ajustado para caber bem em listas horizontais
+            width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: colorScheme.surface,
+              color: isDark
+                  ? const Color(0xFF2A2A2E)
+                  : colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
+              border: isDark ? Border.all(color: Colors.white12) : null,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.shadow, // Sombra sutil
+                  color: AppColors.shadow,
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -46,7 +49,7 @@ class SquareButton extends StatelessWidget {
                 width: 22,
                 height: 22,
                 colorFilter: ColorFilter.mode(
-                  colorScheme.primary, // Ícone pintado com a cor primária
+                  isDark ? Colors.white : colorScheme.primary,
                   BlendMode.srcIn,
                 ),
               ),

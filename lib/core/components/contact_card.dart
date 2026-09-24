@@ -43,8 +43,8 @@ class ContactCard extends StatelessWidget {
               : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 4,
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],

@@ -44,7 +44,6 @@ class _MaisPageState extends State<MaisPage> {
                     child: IconButton(
                       icon: const Icon(Icons.close),
                       onPressed: () {
-                        // Tenta navegar para a raiz absoluta do aplicativo
                         Modular.to.navigate('/main/home');
                       },
                     ),
@@ -53,10 +52,15 @@ class _MaisPageState extends State<MaisPage> {
 
                   _buildListTile(
                     context,
+                    'Escolher tema',
+                    Icons.palette_outlined,
+                    onTap: () => _showThemeDialog(context, state.isDarkMode),
+                  ),
+                  _buildListTile(
+                    context,
                     'Política de Privacidade',
                     Icons.chevron_right,
                     onTap: () {
-                      // Navegação usando pushNamed
                       Modular.to.pushNamed('./politica-privacidade');
                     },
                   ),
@@ -65,17 +69,14 @@ class _MaisPageState extends State<MaisPage> {
                     'Fale com a Prefeitura',
                     Icons.chevron_right,
                     onTap: () {
-                      // Navegação usando pushNamed
                       Modular.to.pushNamed('./fale-conosco');
                     },
                   ),
 
                   const Spacer(),
 
-                  // Rodapé
                   Column(
                     children: [
-                      // Substitua pelo seu asset de logo
                       Image.asset(AppAssets.logo, height: 90),
                       const SizedBox(height: 60),
                       Text(
@@ -94,21 +95,63 @@ class _MaisPageState extends State<MaisPage> {
     );
   }
 
+  void _showThemeDialog(BuildContext context, bool isDarkMode) {
+    final currentValue = isDarkMode ? 'Escuro' : 'Claro';
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Escolher tema'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Claro'),
+                leading: Icon(
+                  currentValue == 'Claro' ? Icons.check_circle : Icons.circle_outlined,
+                ),
+                onTap: () async {
+                  await _cubit.setTheme(ThemeMode.light);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                },
+              ),
+              ListTile(
+                title: const Text('Escuro'),
+                leading: Icon(
+                  currentValue == 'Escuro' ? Icons.check_circle : Icons.circle_outlined,
+                ),
+                onTap: () async {
+                  await _cubit.setTheme(ThemeMode.dark);
+                  if (dialogContext.mounted) {
+                    Navigator.of(dialogContext).pop();
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildListTile(
     BuildContext context,
     String title,
     IconData icon, {
-    VoidCallback? onTap, // <- É este parâmetro nomeado que estava faltando!
+    VoidCallback? onTap,
   }) {
     return ListTile(
       title: Text(
         title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(color: AppColors.secondary),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: AppColors.secondary,
+        ),
       ),
       trailing: Icon(icon),
-      onTap: onTap, // O ListTile agora usa a função que foi passada
+      onTap: onTap,
     );
   }
 }

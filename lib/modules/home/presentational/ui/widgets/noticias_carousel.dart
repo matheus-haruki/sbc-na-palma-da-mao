@@ -118,7 +118,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                 child: Text(
                   noticia.titulo,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.white,
+                    color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
@@ -130,22 +130,19 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                 ),
               );
 
-              // 3. Adicionamos o GestureDetector para capturar o clique no Card
               return GestureDetector(
                 onTap: () => noticia.onTap(context),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    gradient: const RadialGradient(
-                      center: Alignment(-1, 0.50),
-                      radius: 4.45,
-                      colors: [
-                        AppColors.gradientBlueStart,
-                        AppColors.gradientBlueEnd,
-                      ],
-                    ),
+                    color: theme.brightness == Brightness.dark
+                        ? const Color(0xFF1E1E22)
+                        : const Color(0xFF2C4F74),
                     borderRadius: BorderRadius.circular(16),
+                    border: theme.brightness == Brightness.dark
+                        ? Border.all(color: Colors.white12)
+                        : null,
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.shadow,
