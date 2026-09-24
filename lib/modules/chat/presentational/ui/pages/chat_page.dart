@@ -147,7 +147,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.send, color: AppColors.secondary),
+            icon: Icon(Icons.send, color: AppColors.secondary),
             onPressed: () {
               _chatCubit.sendMessage(_messageController.text);
               _messageController.clear();
