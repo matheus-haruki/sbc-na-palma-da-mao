@@ -1,4 +1,5 @@
-// lib/modules/mais/presentational/controllers/mais_state.dart
+import 'package:flutter/material.dart';
+
 sealed class MaisState {}
 
 class MaisInitial extends MaisState {}
@@ -6,6 +7,7 @@ class MaisInitial extends MaisState {}
 class MaisLoading extends MaisState {}
 
 class MaisSuccess extends MaisState {
-  final bool isDarkMode;
-  MaisSuccess({required this.isDarkMode});
+  final ThemeMode themeMode;
+
+  MaisSuccess({required this.themeMode});
 }
