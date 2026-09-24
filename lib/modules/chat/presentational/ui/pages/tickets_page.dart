@@ -91,7 +91,7 @@ class _TicketsPageState extends State<TicketsPage> {
 
   Widget _buildList(List<TicketModel> list) {
     if (list.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'Nenhum chamado nesta categoria.',
           style: TextStyle(color: AppColors.textSecondary),
