@@ -66,7 +66,7 @@ class _ServicosPageState extends State<ServicosPage> {
                           hintStyle: theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.search,
                             color: AppColors.secondary,
                           ),
@@ -253,12 +253,12 @@ class _ServicosPageState extends State<ServicosPage> {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: AppColors.shadow,
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -277,13 +277,13 @@ class _ServicosPageState extends State<ServicosPage> {
       );
     }
     if (servico.type == ServicoType.web) {
-      return const Icon(
+      return Icon(
         Icons.open_in_new,
         size: 18,
         color: AppColors.secondary,
       );
     }
-    return const Icon(
+    return Icon(
       Icons.chevron_right,
       size: 18,
       color: AppColors.secondary,
