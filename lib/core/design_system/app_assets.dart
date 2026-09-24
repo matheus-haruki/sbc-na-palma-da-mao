@@ -1,5 +1,16 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:palma_da_mao/core/theme/app_theme_controller.dart';
+
 abstract class AppAssets {
   AppAssets._();
+
+  static bool get _isDark {
+    final mode = AppThemeController.instance.themeMode;
+    if (mode == ThemeMode.dark) return true;
+    if (mode == ThemeMode.light) return false;
+    return PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+  }
 
   static const String _iconPath = 'assets/icon';
 
@@ -14,7 +25,9 @@ abstract class AppAssets {
   static const String iconeHome = '$_iconPath/home.svg';
   static const String iconeServicos = '$_iconPath/services.svg';
   static const String iconeMenu = '$_iconPath/menu.svg';
-  static const String logo = '$_iconPath/logo.png';
+  static const String logoColorido = '$_iconPath/logo.png';
+  static const String logoTemaEscuro = '$_iconPath/logo_tema_escuro.png';
+  static String get logo => _isDark ? logoTemaEscuro : logoColorido;
   static const String iconeVoltar = '$_iconPath/return.svg';
   static const String iconePata = '$_iconPath/paw.svg';
   static const String iconeAltoFalante = '$_iconPath/loudspeaker.svg';
