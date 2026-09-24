@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     children: [
                       Image.asset(
-                        'assets/icon/logo.png',
+                        AppAssets.logo,
                         width: 90,
                         height: 90,
                         fit: BoxFit.contain,
@@ -168,7 +168,7 @@ class _HomePageState extends State<HomePage> {
                                       Container(
                                         width: 56,
                                         height: 56,
-                                        decoration: const BoxDecoration(
+                                        decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: AppColors.backgroundBlue,
                                         ),
@@ -177,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                                             atalho.iconePath,
                                             width: 22,
                                             height: 22,
-                                            colorFilter: const ColorFilter.mode(
+                                            colorFilter: ColorFilter.mode(
                                               AppColors.darkBlue,
                                               BlendMode.srcIn,
                                             ),
