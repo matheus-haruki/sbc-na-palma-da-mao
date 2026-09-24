@@ -62,7 +62,7 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Title
-                        const Text(
+                        Text(
                           'Guia de Arrecadação - IPTU',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkBlue),
                           textAlign: TextAlign.center,
@@ -148,7 +148,7 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                               label: const Text('Salvar Documento (PDF)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.secondary,
-                                side: const BorderSide(color: AppColors.secondary, width: 1.5),
+                                side: BorderSide(color: AppColors.secondary, width: 1.5),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
@@ -417,7 +417,7 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                 ),
                 child: Text(
                   'Parcela ${parcela.numeroParcela ?? "-"}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.secondary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -444,7 +444,7 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
           const SizedBox(height: 4),
           Text(
             currencyFormatter.format(parcela.valor),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: AppColors.darkBlue,
@@ -572,7 +572,7 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       foregroundColor: AppColors.secondary,
-                      side: const BorderSide(color: AppColors.secondary),
+                      side: BorderSide(color: AppColors.secondary),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
