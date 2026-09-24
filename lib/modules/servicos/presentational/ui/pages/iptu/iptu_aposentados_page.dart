@@ -50,7 +50,7 @@ class IptuAposentadosPage extends StatelessWidget {
                   fontSize: 13,
                 ),
               ),
-              trailing: const Icon(
+              trailing: Icon(
                 Icons.chevron_right,
                 color: AppColors.secondary,
                 size: 20,
