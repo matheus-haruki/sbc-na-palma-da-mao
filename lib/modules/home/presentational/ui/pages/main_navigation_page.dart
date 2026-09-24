@@ -88,7 +88,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const TextStyle(
+            return TextStyle(
               color: AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
