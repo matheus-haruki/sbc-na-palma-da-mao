@@ -137,7 +137,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    gradient: const RadialGradient(
+                    gradient: RadialGradient(
                       center: Alignment(-1, 0.50),
                       radius: 4.45,
                       colors: [
@@ -166,7 +166,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                         animacaoWidget,
                       ],
                       const SizedBox(width: 8),
-                      const Icon(Icons.chevron_right, color: AppColors.white),
+                      Icon(Icons.chevron_right, color: AppColors.white),
                     ],
                   ),
                 ),
