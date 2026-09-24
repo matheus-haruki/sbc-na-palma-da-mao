@@ -26,7 +26,7 @@ class AppStandardPage extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: AppColors.secondary,
+      backgroundColor: AppColors.gradientBlueStart,
       appBar: AppBar(
         toolbarHeight: 75,
         backgroundColor: Colors.transparent,
@@ -34,7 +34,7 @@ class AppStandardPage extends StatelessWidget {
         scrolledUnderElevation: 0,
 
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
