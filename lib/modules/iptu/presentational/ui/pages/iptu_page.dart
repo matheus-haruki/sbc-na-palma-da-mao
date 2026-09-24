@@ -210,7 +210,7 @@ class _IptuPageState extends State<IptuPage> {
                                             children: [
                                               Text(
                                                 origem.toUpperCase(),
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: AppColors.secondary,
                                                   fontSize: 16,
@@ -254,7 +254,7 @@ class _IptuPageState extends State<IptuPage> {
                                           Text.rich(
                                             TextSpan(
                                               text: 'R\$ ',
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                                 color: AppColors.darkBlue,
