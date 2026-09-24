@@ -18,6 +18,11 @@ class SquareButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    // No tema dark o ícone fica branco puro; no tema claro mantém a cor
+    // original (AppColors.darkBlue), sem alterar o comportamento atual.
+    final iconColor = isDark ? Colors.white : AppColors.darkBlue;
 
     return InkWell(
       onTap: onTap,
@@ -46,7 +51,7 @@ class SquareButton extends StatelessWidget {
                 width: 22,
                 height: 22,
                 colorFilter: ColorFilter.mode(
-                  colorScheme.primary, // Ícone pintado com a cor primária
+                  iconColor,
                   BlendMode.srcIn,
                 ),
               ),
