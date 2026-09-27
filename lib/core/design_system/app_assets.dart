@@ -27,4 +27,5 @@ abstract class AppAssets {
   static const String dogAnimation = 'assets/lottie/dog.json';
   static const String vacinaAnimation = 'assets/lottie/vacina.json';
   static const String iptuAnimation = 'assets/lottie/iptu.json';
+  static const String zeladoriaAnimation = 'assets/lottie/zeladoria.json';
 }

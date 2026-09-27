@@ -70,7 +70,7 @@ class _CategoriaDetalhePageState extends State<CategoriaDetalhePage> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
               itemCount: servicosFiltrados.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 // Passamos true para isTopLevel para aplicar o visual de "Card" na raiz
                 return _buildServicoItem(

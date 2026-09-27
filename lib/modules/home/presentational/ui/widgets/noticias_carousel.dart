@@ -5,7 +5,6 @@ import 'package:lottie/lottie.dart';
 import 'package:palma_da_mao/core/components/dot_indicator.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
-import 'package:palma_da_mao/core/utils/app_browser_navigator.dart'; // Import do navegador nativo
 
 // 1. Modelo atualizado para receber a ação de clique (onTap)
 class NoticiaItem {
@@ -54,6 +53,13 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
       onTap: (context) {
         // Navega para a tela nativa de instruções de adoção
         Modular.to.pushNamed('/main/servicos/adocao-instrucoes');
+      },
+    ),
+    NoticiaItem(
+      titulo: 'ZeladoriA',
+      lottiePath: AppAssets.zeladoriaAnimation,
+      onTap: (context) {
+        Modular.to.pushNamed('/zeladoria/');
       },
     ),
   ];
@@ -124,9 +130,8 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: isAnimacaoEsquerda
-                      ? TextAlign.left
-                      : TextAlign.right,
+                  textAlign:
+                      isAnimacaoEsquerda ? TextAlign.left : TextAlign.right,
                 ),
               );
 

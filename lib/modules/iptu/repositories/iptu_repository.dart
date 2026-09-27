@@ -10,10 +10,10 @@ class IptuRepository {
   Future<List<DebitoModel>> consultarDebitos(String cpf) async {
     try {
       final response = await _dio.post(
-        'http://10.1.0.240:8080/consulta-de-debitos/chat-bot/consulta-debitos-de-iptu',
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-debitos-de-iptu',
         data: {
           "cpf": cpf,
-          "codigoSistema": "7f3a91c4-8b27-11f1-a6d2-3e5c9b71f804",
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
         },
       );
 
@@ -39,10 +39,10 @@ class IptuRepository {
   Future<Map<String, dynamic>> consultarDetalhes(String lancamento) async {
     try {
       final response = await _dio.post(
-        'http://10.1.0.240:8080/consulta-de-debitos/chat-bot/consulta-detalhes-por-lancamento',
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-detalhes-por-lancamento',
         data: {
           "lancamento": lancamento,
-          "codigoSistema": "7f3a91c4-8b27-11f1-a6d2-3e5c9b71f804",
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
         },
       );
 
@@ -64,10 +64,10 @@ class IptuRepository {
   Future<GuiaPagamentoModel> gerarBoletoTotal(String lancamento) async {
     try {
       final response = await _dio.post(
-        'http://10.1.0.240:8080/consulta-de-debitos/chat-bot/consulta-boleto',
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-boleto',
         data: {
           "lancamento": lancamento,
-          "codigoSistema": "7f3a91c4-8b27-11f1-a6d2-3e5c9b71f804",
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
         },
       );
 
@@ -88,11 +88,11 @@ class IptuRepository {
   Future<GuiaPagamentoModel> gerarBoletoParcela(String lancamento, int parcela) async {
     try {
       final response = await _dio.post(
-        'http://10.1.0.240:8080/consulta-de-debitos/chat-bot/emissao-de-boleto-por-parcela',
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/emissao-de-boleto-por-parcela',
         data: {
           "lancamento": lancamento,
           "parcela": parcela.toString(),
-          "codigoSistema": "7f3a91c4-8b27-11f1-a6d2-3e5c9b71f804",
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
         },
       );
 

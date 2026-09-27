@@ -8,7 +8,7 @@ class VacinacaoRepository {
 
   Future<List<VacinacaoModel>> fetchVacinacoes() async {
     // Usando JSONPlaceholder como API mock por enquanto
-    final response = await _httpClient.get('https://api-saudesmart-hmg.saobernardo.sp.gov.br/api/v1/vacinacao/sarampo');
+    final response = await _httpClient.get('https://api-saudesmart.saobernardo.sp.gov.br/api/v1/vacinacao/sarampo');
     
     // A API retorna a lista diretamente na raiz
     final List<dynamic> data = response as List<dynamic>;

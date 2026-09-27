@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
@@ -18,10 +18,6 @@ class IptuPage extends StatefulWidget {
 
 class _IptuPageState extends State<IptuPage> {
   final _cpfController = TextEditingController();
-  final _cpfMaskFormatter = MaskTextInputFormatter(
-    mask: '###.###.###-##',
-    filter: {"#": RegExp(r'[0-9]')},
-  );
   late final IptuCubit _cubit;
   bool _isButtonEnabled = false;
 
@@ -33,7 +29,8 @@ class _IptuPageState extends State<IptuPage> {
   }
 
   void _onCpfChanged() {
-    final isComplete = _cpfMaskFormatter.getUnmaskedText().length == 11;
+    final unmaskedText = _cpfController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final isComplete = unmaskedText.length == 11;
     if (_isButtonEnabled != isComplete) {
       setState(() {
         _isButtonEnabled = isComplete;
@@ -96,7 +93,8 @@ class _IptuPageState extends State<IptuPage> {
                 onPressed: _isButtonEnabled
                     ? () {
                         FocusScope.of(context).unfocus();
-                        _cubit.buscarDebitos(_cpfMaskFormatter.getUnmaskedText());
+                        final unmaskedText = _cpfController.text.replaceAll(RegExp(r'[^0-9]'), '');
+                        _cubit.buscarDebitos(unmaskedText);
                       }
                     : null,
                 child: const Text(

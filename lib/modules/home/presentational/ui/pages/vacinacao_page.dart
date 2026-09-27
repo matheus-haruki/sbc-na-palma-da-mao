@@ -67,7 +67,7 @@ class _VacinacaoPageState extends State<VacinacaoPage> {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.all(16.0),
               itemCount: dados.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final item = dados[index];
                 return Card(
