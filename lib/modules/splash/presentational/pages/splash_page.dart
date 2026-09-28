@@ -40,7 +40,7 @@ class _SplashPageState extends State<SplashPage> {
             Image.asset(AppAssets.logo, width: 200),
             Lottie.asset(
               AppAssets.loadingAnimation,
-              width: 80,
+              width: 120,
               repeat: false,
               onLoaded: (composition) {
                 Future.delayed(composition.duration, _goToNextRoute);

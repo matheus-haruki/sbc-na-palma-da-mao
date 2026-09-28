@@ -11,7 +11,7 @@ class ZeladoriaHomePage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppStandardPage(
-      title: 'Ouvidoria / Zeladoria',
+      title: 'Zeladoria',
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -26,7 +26,6 @@ class ZeladoriaHomePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            
             _buildActionCard(
               context: context,
               title: 'Registrar Problema',
@@ -34,9 +33,7 @@ class ZeladoriaHomePage extends StatelessWidget {
               icon: Icons.add_location_alt_outlined,
               onTap: () => Modular.to.pushNamed('/zeladoria/registrar'),
             ),
-            
             const SizedBox(height: 16),
-            
             _buildActionCard(
               context: context,
               title: 'Acompanhar Solicitações',

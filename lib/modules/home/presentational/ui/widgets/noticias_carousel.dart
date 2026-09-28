@@ -34,10 +34,10 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
   // 2. Lista atualizada com as navegações exatas que você solicitou
   late final List<NoticiaItem> noticias = [
     NoticiaItem(
-      titulo: 'Campanha de vacinação',
-      lottiePath: AppAssets.vacinaAnimation,
+      titulo: 'Registrar solicitação',
+      lottiePath: AppAssets.zeladoriaAnimation,
       onTap: (context) {
-        Modular.to.pushNamed('./vacinacao');
+        Modular.to.pushNamed('/zeladoria/');
       },
     ),
     NoticiaItem(
@@ -48,6 +48,14 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
       },
     ),
     NoticiaItem(
+      titulo: 'Campanha de vacinação',
+      lottiePath: AppAssets.vacinaAnimation,
+      onTap: (context) {
+        Modular.to.pushNamed('./vacinacao');
+      },
+    ),
+    
+    NoticiaItem(
       titulo: 'Adote um amigo',
       lottiePath: AppAssets.dogAnimation,
       onTap: (context) {
@@ -55,13 +63,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
         Modular.to.pushNamed('/main/servicos/adocao-instrucoes');
       },
     ),
-    NoticiaItem(
-      titulo: 'ZeladoriA',
-      lottiePath: AppAssets.zeladoriaAnimation,
-      onTap: (context) {
-        Modular.to.pushNamed('/zeladoria/');
-      },
-    ),
+    
   ];
 
   @override

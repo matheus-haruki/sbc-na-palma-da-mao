@@ -57,11 +57,11 @@ class HomeCubit extends Cubit<HomeState> {
           ),
           AtalhoModel(
             idCategoria:
-                'cultura', // Vai abrir a lista de Cultura (onde colocamos as Notícias no JSON)
-            titulo: 'Notícias',
+                'cidadania', // Vai abrir a lista de Cultura (onde colocamos as Notícias no JSON)
+            titulo: 'Zeladoria',
             iconePath: AppAssets
-                .iconeJornal, // Troque se tiver um ícone específico para notícias
-            url: 'https://saobernardo.sp.gov.br/noticias-do-municipio',
+                .iconeZeladoria, // Troque se tiver um ícone específico para notícias
+            rota: '/zeladoria',
           ),
           AtalhoModel(
             idCategoria:

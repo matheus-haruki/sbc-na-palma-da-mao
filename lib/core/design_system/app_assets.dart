@@ -14,7 +14,7 @@ abstract class AppAssets {
   static const String iconeHome = '$_iconPath/home.svg';
   static const String iconeServicos = '$_iconPath/services.svg';
   static const String iconeMenu = '$_iconPath/menu.svg';
-  static const String logo = '$_iconPath/logo.png';
+  static const String logo = '$_iconPath/logo-light.png';
   static const String iconeVoltar = '$_iconPath/return.svg';
   static const String iconePata = '$_iconPath/paw.svg';
   static const String iconeAltoFalante = '$_iconPath/loudspeaker.svg';
@@ -22,6 +22,7 @@ abstract class AppAssets {
   static const String iconePessoa = '$_iconPath/person.svg';
   static const String iconeSaude2 = '$_iconPath/medic2.svg';
   static const String iconeJornal = '$_iconPath/news.svg';
+  static const String iconeZeladoria = '$_iconPath/barrier.svg';
 
   static const String loadingAnimation = 'assets/lottie/loading.json';
   static const String dogAnimation = 'assets/lottie/dog.json';
