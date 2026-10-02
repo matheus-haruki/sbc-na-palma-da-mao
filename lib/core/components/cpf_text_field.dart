@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:palma_da_mao/core/components/app_input_container.dart';
 
 class CpfTextField extends StatefulWidget {

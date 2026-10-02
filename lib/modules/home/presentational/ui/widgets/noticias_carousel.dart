@@ -47,14 +47,14 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
         Modular.to.pushNamed('/iptu');
       },
     ),
-    NoticiaItem(
-      titulo: 'Campanha de vacinação',
-      lottiePath: AppAssets.vacinaAnimation,
-      onTap: (context) {
-        Modular.to.pushNamed('./vacinacao');
-      },
-    ),
-    
+    // NoticiaItem(
+    //   titulo: 'Campanha de vacinação',
+    //   lottiePath: AppAssets.vacinaAnimation,
+    //   onTap: (context) {
+    //     Modular.to.pushNamed('./vacinacao');
+    //   },
+    // ),
+
     NoticiaItem(
       titulo: 'Adote um amigo',
       lottiePath: AppAssets.dogAnimation,
@@ -63,7 +63,6 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
         Modular.to.pushNamed('/main/servicos/adocao-instrucoes');
       },
     ),
-    
   ];
 
   @override
