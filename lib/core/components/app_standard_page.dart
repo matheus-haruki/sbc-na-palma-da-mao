@@ -52,6 +52,7 @@ class AppStandardPage extends StatelessWidget {
         ),
 
         automaticallyImplyLeading: false,
+        centerTitle: false,
 
         leading: showBackButton
             ? IconButton(
