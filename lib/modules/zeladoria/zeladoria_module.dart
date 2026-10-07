@@ -11,11 +11,12 @@ class ZeladoriaModule extends Module {
   @override
   void routes(RouteManager r) {
     r.child('/', child: (context) => const ZeladoriaHomePage());
-    r.child('/registrar', child: (context) => const FormularioZeladoriaPage());
-    r.child('/acompanhar', child: (context) => const ZeladoriaAcompanharPage());
+    r.child('/registrar', child: (context) => const FormularioZeladoriaPage(), transition: TransitionType.fadeIn);
+    r.child('/acompanhar', child: (context) => const ZeladoriaAcompanharPage(), transition: TransitionType.fadeIn);
     r.child(
       '/detalhes',
       child: (context) => ZeladoriaDetalhesPage(solicitacao: r.args.data),
+      transition: TransitionType.fadeIn,
     );
   }
 }

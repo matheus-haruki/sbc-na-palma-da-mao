@@ -7,8 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
-import 'package:palma_da_mao/core/components/app_input_container.dart';
 import 'package:palma_da_mao/core/components/app_text_field.dart';
+import 'package:palma_da_mao/core/components/app_success_modal.dart';
+import 'package:palma_da_mao/core/components/app_review_modal.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class FormularioZeladoriaPage extends StatefulWidget {
@@ -32,6 +33,8 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
     filter: {"#": RegExp(r'[0-9]')},
   );
 
+  final GlobalKey _categoriaKey = GlobalKey();
+  final GlobalKey _descricaoKey = GlobalKey();
   int? _categoriaId;
   final List<XFile> _fotos = [];
   bool _isLoading = false;
@@ -187,7 +190,82 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
     }
   }
 
+  void _abrirSelecaoCategoria() {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    // Rola suavemente o campo
+    final ctx = _categoriaKey.currentContext;
+    if (ctx != null && ctx.mounted) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+    }
+
+    // Aguarda o scroll e abre o modal perfeitamente
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (context) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Selecione uma categoria',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkBlue,
+                        ),
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: _categorias.entries.map((e) {
+                      final isSelected = _categoriaId == e.key;
+                      return ListTile(
+                        title: Text(
+                          e.value,
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(Icons.check, color: AppColors.primary)
+                            : null,
+                        onTap: () {
+                          setState(() => _categoriaId = e.key);
+                          Navigator.pop(context);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
   Future<void> _abrirOpcoesDeFoto() async {
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -206,7 +284,8 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: AppColors.primary),
+                leading:
+                    const Icon(Icons.photo_library, color: AppColors.primary),
                 title: const Text('Escolher da Galeria'),
                 onTap: () {
                   Navigator.pop(context);
@@ -221,6 +300,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   }
 
   Future<void> _tirarFotoCamera() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.camera,
@@ -238,6 +318,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   }
 
   Future<void> _selecionarFotosGaleria() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final picker = ImagePicker();
     final pickedFiles = await picker.pickMultiImage(imageQuality: 80);
 
@@ -309,24 +390,21 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       final protocolo = response['protocolo'];
 
       if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => AlertDialog(
-            title: const Text('Solicitação Enviada!'),
-            content: Text(
-              'Seu protocolo de atendimento é:\n\n$protocolo\n\nAguarde o andamento da análise.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Fecha o modal de sucesso
-                  Navigator.pop(context); // Volta para a ZeladoriaHomePage
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ),
+        AppSuccessModal.show(
+          context,
+          title: 'Solicitação Enviada!',
+          message: 'Sua solicitação foi registrada com sucesso. Anote o número do seu protocolo:',
+          highlightedText: protocolo.toString(),
+          bottomMessage: 'Aguarde o andamento da análise.',
+          onPressed: () {
+            // Abre o modal de avaliação após o fechamento do sucesso
+            AppReviewModal.show(
+              context,
+              onFinish: () {
+                Navigator.pop(context); // Volta para a ZeladoriaHomePage
+              },
+            );
+          },
         );
       }
     } catch (e) {
@@ -361,7 +439,10 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   Widget build(BuildContext context) {
     return AppStandardPage(
       title: 'Zeladoria',
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -448,67 +529,53 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
               ),
               const SizedBox(height: 16),
               _buildLabel('Categoria do Problema'),
-              AppInputContainer(
-                child: DropdownMenu<int>(
-                  initialSelection: _categoriaId,
-                  expandedInsets: EdgeInsets.zero,
-                  hintText: 'Selecione uma categoria',
-                  textStyle: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(fontSize: 16) ??
-                      const TextStyle(fontSize: 16),
-                  inputDecorationTheme: InputDecorationTheme(
-                    hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                  ),
-                  menuStyle: MenuStyle(
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                  ),
-                  dropdownMenuEntries: _isLoadingCategorias
-                      ? []
-                      : _categorias.entries.map((e) {
-                          return DropdownMenuEntry<int>(
-                            value: e.key,
-                            label: e.value,
-                          );
-                        }).toList(),
-                  onSelected: _isLoadingCategorias
-                      ? null
-                      : (val) {
-                          if (val != null) {
-                            setState(() => _categoriaId = val);
-                          }
-                        },
+              AppTextField(
+                key: _categoriaKey,
+                readOnly: true,
+                hintText: 'Selecione uma categoria',
+                controller: TextEditingController(
+                  text: _categoriaId != null ? _categorias[_categoriaId] : '',
                 ),
+                suffixIcon:
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                onTap: _isLoadingCategorias ? null : _abrirSelecaoCategoria,
+                validator: (val) =>
+                    _categoriaId == null ? 'Selecione uma categoria' : null,
               ),
               const SizedBox(height: 16),
               _buildLabel('Título'),
               AppTextField(
                 controller: _tituloController,
                 hintText: 'Ex: Buraco na via',
+                textCapitalization: TextCapitalization.sentences,
                 validator: (val) =>
                     (val == null || val.isEmpty) ? 'Informe um título' : null,
               ),
               const SizedBox(height: 16),
               _buildLabel('Descrição detalhada'),
               AppTextField(
+                key: _descricaoKey,
                 controller: _descricaoController,
                 hintText: 'Explique o problema detalhadamente...',
                 alignLabelWithHint: true,
-                maxLines: 4,
+                minLines: 3,
+                maxLines: 6,
+                maxLength: 500,
+                textCapitalization: TextCapitalization.sentences,
+                onTap: () {
+                  Future.delayed(const Duration(milliseconds: 300), () {
+                    if (!mounted) return;
+                    final ctx = _descricaoKey.currentContext;
+                    if (ctx != null && ctx.mounted) {
+                      Scrollable.ensureVisible(
+                        ctx,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        alignment: 0.2, // Rola para deixar visível
+                      );
+                    }
+                  });
+                },
                 validator: (val) =>
                     (val == null || val.isEmpty) ? 'Descreva o problema' : null,
               ),
@@ -606,6 +673,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

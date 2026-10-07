@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/components/app_empty_state.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 
 class ZeladoriaAcompanharPage extends StatefulWidget {
@@ -95,7 +96,7 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
   @override
   Widget build(BuildContext context) {
     return AppStandardPage(
-      title: 'Acompanhar',
+      title: 'Acompanhar Solicitações',
       body: Column(
         children: [
           Padding(
@@ -114,7 +115,6 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   const Padding(
                     padding: EdgeInsets.only(left: 4, bottom: 8),
                     child: Text(
@@ -127,7 +127,6 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
                     ),
                   ),
                   CpfTextField(controller: _cpfController),
-
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 54,
@@ -156,7 +155,6 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
               ),
             ),
           ),
-
           Expanded(
             child: _isLoading
                 ? ListView.separated(
@@ -234,149 +232,151 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
                     },
                   )
                 : (!_foiBuscado)
-                ? const SizedBox.shrink()
-                : _solicitacoes.isEmpty
-                ? const Center(
-                    child: Text(
-                      'Nenhuma solicitação encontrada para este CPF.',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _solicitacoes.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final item = _solicitacoes[index];
-                      final status = item['status'] ?? 'Desconhecido';
-                      final color = _getStatusColor(status);
-                      final categoriaNome =
-                          item['categorias']?['nome'] ?? 'Outros';
+                    ? const SizedBox.shrink()
+                    : _solicitacoes.isEmpty
+                        ? const AppEmptyState(message: 'Nenhuma solicitação encontrada.')
+                        : ListView.separated(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _solicitacoes.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final item = _solicitacoes[index];
+                              final status = item['status'] ?? 'Desconhecido';
+                              final color = _getStatusColor(status);
+                              final categoriaNome =
+                                  item['categorias']?['nome'] ?? 'Outros';
 
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              Modular.to.pushNamed(
-                                '/zeladoria/detalhes',
-                                arguments: item,
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border:
+                                      Border.all(color: Colors.grey.shade200),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.03),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
+                                    onTap: () {
+                                      Modular.to.pushNamed(
+                                        '/zeladoria/detalhes',
+                                        arguments: item,
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: color.withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                    12,
+                                                  ),
+                                                  border: Border.all(
+                                                    color:
+                                                        color.withOpacity(0.3),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  status.toUpperCase(),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: color,
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                _formatarData(
+                                                    item['criado_em']),
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            item['titulo'] ?? '',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.darkBlue,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Categoria: $categoriaNome',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            item['descricao'] ?? '',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade800,
+                                            ),
+                                            maxLines: 3,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          const Divider(),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Protocolo:',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                              Text(
+                                                item['protocolo'] ?? '-',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Courier',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               );
                             },
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: color.withOpacity(0.3),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          status.toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: color,
-                                          ),
-                                        ),
-                                      ),
-                                      Text(
-                                        _formatarData(item['criado_em']),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    item['titulo'] ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.darkBlue,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Categoria: $categoriaNome',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.grey.shade700,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    item['descricao'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey.shade800,
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Divider(),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Protocolo:',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey.shade600,
-                                        ),
-                                      ),
-                                      Text(
-                                        item['protocolo'] ?? '-',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Courier',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
           ),
         ],
       ),
