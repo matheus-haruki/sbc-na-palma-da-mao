@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:palma_da_mao/core/components/contact_card.dart';
 import 'package:palma_da_mao/core/components/square_button.dart';
 import 'package:palma_da_mao/core/design_system/app_assets.dart';
@@ -13,6 +12,7 @@ import 'package:palma_da_mao/modules/home/presentational/controllers/home_cubit.
 import 'package:palma_da_mao/modules/home/presentational/controllers/home_state.dart';
 import 'package:palma_da_mao/modules/home/presentational/ui/widgets/emergency_call_modal.dart';
 import 'package:palma_da_mao/modules/home/presentational/ui/widgets/noticias_carousel.dart';
+import 'package:palma_da_mao/modules/home/presentational/ui/widgets/servico_mais_utilizado_card.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -120,8 +120,9 @@ class _HomePageState extends State<HomePage> {
                               itemBuilder: (context, index) {
                                 final atalho = state.maisUtilizados[index];
 
-                                return InkWell(
-                                  // AJUSTE 2: Adicionando a navegação
+                                return ServicoMaisUtilizadoCard(
+                                  titulo: atalho.titulo,
+                                  iconePath: atalho.iconePath,
                                   onTap: () {
                                     if (atalho.url != null &&
                                         atalho.url!.isNotEmpty) {
@@ -129,14 +130,10 @@ class _HomePageState extends State<HomePage> {
                                         context: context,
                                         urlString: atalho.url!,
                                       );
-                                    }
-                                    // 2. Se tiver Rota, navega dentro do app
-                                    else if (atalho.rota != null &&
+                                    } else if (atalho.rota != null &&
                                         atalho.rota!.isNotEmpty) {
                                       Modular.to.pushNamed(atalho.rota!);
-                                    }
-                                    // 3. Se não tiver nenhum dos dois, funciona como Categoria normal
-                                    else {
+                                    } else {
                                       Modular.to.pushNamed(
                                         './categoria',
                                         arguments: {
@@ -146,58 +143,6 @@ class _HomePageState extends State<HomePage> {
                                       );
                                     }
                                   },
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: Container(
-                                    width: 110,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.surface,
-                                      borderRadius: BorderRadius.circular(24),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.shadow,
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
-                                          spreadRadius: 0,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 56,
-                                          height: 56,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: AppColors.backgroundBlue,
-                                          ),
-                                          child: Center(
-                                            child: SvgPicture.asset(
-                                              atalho.iconePath,
-                                              width: 22,
-                                              height: 22,
-                                              colorFilter:
-                                                  const ColorFilter.mode(
-                                                AppColors.darkBlue,
-                                                BlendMode.srcIn,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          atalho.titulo,
-                                          textAlign: TextAlign.center,
-                                          style: theme.textTheme.labelMedium
-                                              ?.copyWith(
-                                            color: colorScheme.onSurface,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
                                 );
                               },
                             ),

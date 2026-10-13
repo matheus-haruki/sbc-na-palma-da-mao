@@ -66,10 +66,10 @@ class HomeCubit extends Cubit<HomeState> {
           AtalhoModel(
             idCategoria:
                 'cidadania', // Cidadania geralmente engloba atendimento/ouvidoria
-            titulo: 'Fale Conosco',
+            titulo: 'Multas de Trânsito',
             iconePath: AppAssets
-                .iconeTelefone, // Troque se tiver um ícone de balão de fala/chat
-            rota: './fale-conosco',
+                .iconeCarro, // Troque se tiver um ícone de balão de fala/chat
+            rota: '/transito',
           ),
         ],
       ),

@@ -24,6 +24,8 @@ abstract class AppAssets {
   static const String iconeJornal = '$_iconPath/news.svg';
   static const String iconeZeladoria = '$_iconPath/barrier.svg';
   static const String iconeSucesso = '$_iconPath/success.png';
+  static const String iconeCarro = '$_iconPath/car.svg';
+  static const String iconeCarro2 = '$_iconPath/car2.svg';
   static const String iconeVazio = '$_iconPath/empty.png';
 
   static const String loadingAnimation = 'assets/lottie/loading.json';
@@ -31,4 +33,6 @@ abstract class AppAssets {
   static const String vacinaAnimation = 'assets/lottie/vacina.json';
   static const String iptuAnimation = 'assets/lottie/iptu.json';
   static const String zeladoriaAnimation = 'assets/lottie/zeladoria.json';
+  static const String carAnimation = 'assets/lottie/car.json';
+  static const String testeAnimation = 'assets/lottie/teste.json';
 }

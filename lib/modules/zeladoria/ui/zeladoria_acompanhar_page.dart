@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:palma_da_mao/core/components/app_empty_state.dart';
+import 'package:palma_da_mao/core/components/app_shimmer_list.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 
 class ZeladoriaAcompanharPage extends StatefulWidget {
@@ -157,79 +158,8 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
           ),
           Expanded(
             child: _isLoading
-                ? ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: 4,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 80,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                Container(
-                                  width: 100,
-                                  height: 16,
-                                  color: Colors.grey.shade200,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              width: 200,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              width: 150,
-                              height: 16,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Container(
-                              width: double.infinity,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              width: double.infinity,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                ? const AppShimmerList(
+                    padding: EdgeInsets.all(16),
                   )
                 : (!_foiBuscado)
                     ? const SizedBox.shrink()

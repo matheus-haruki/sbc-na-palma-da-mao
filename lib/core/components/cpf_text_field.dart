@@ -38,6 +38,9 @@ class _CpfTextFieldState extends State<CpfTextField> {
       child: TextFormField(
         controller: widget.controller,
         inputFormatters: [_cpfMaskFormatter],
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
         onChanged: (val) {
           if (widget.onChanged != null) {
             widget.onChanged!(_cpfMaskFormatter.getUnmaskedText());

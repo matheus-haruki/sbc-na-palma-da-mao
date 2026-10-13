@@ -47,6 +47,14 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
         Modular.to.pushNamed('/iptu');
       },
     ),
+    NoticiaItem(
+      titulo: 'Multas de Trânsito',
+      lottiePath: AppAssets.testeAnimation,
+      onTap: (context) {
+        Modular.to.pushNamed('/transito');
+      },
+    ),
+
     // NoticiaItem(
     //   titulo: 'Campanha de vacinação',
     //   lottiePath: AppAssets.vacinaAnimation,
@@ -117,7 +125,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
 
               final Widget animacaoWidget = SizedBox(
                 child: Center(
-                  child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover),
+                  child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover,height: 100),
                 ),
               );
 

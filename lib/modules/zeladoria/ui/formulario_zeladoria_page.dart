@@ -34,14 +34,58 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   );
 
   final GlobalKey _categoriaKey = GlobalKey();
+  final GlobalKey _servicoKey = GlobalKey();
   final GlobalKey _descricaoKey = GlobalKey();
   int? _categoriaId;
+  String? _servicoSelecionado;
   final List<XFile> _fotos = [];
   bool _isLoading = false;
   bool _isFetchingLocation = false;
 
   Map<int, String> _categorias = {};
+  Map<int, List<String>> _servicosPorCategoriaId = {};
   bool _isLoadingCategorias = true;
+
+  static const Map<String, List<String>> _servicosPorCategoria = {
+    'Pavimentação e vias': [
+      'Tapa-buracos',
+      'Recomposição de sarjetas / reparos gerais (guias e sarjetas)',
+    ],
+    'Drenagem': [
+      'Limpeza de boca de bueiros / boca de lobo',
+      'Troca de tampas de bueiros/ralos',
+      'Desassoreamento de córregos',
+    ],
+    'Coleta de resíduos': [
+      'Coleta e transporte de entulhos',
+      'Coleta e transporte de grandes objetos (bota-fora)',
+      'Coleta de resíduos sólidos domiciliares, feiras livres e varrição (Pode ser usado para reclamações de falha na coleta)',
+    ],
+    'Capina e roçada': [
+      'Capina e roçada de áreas não ajardinadas',
+    ],
+    'Mobiliário de limpeza': [
+      'Fornecimento/reposição de papeleiras',
+      'Substituição de contêineres',
+    ],
+    'Limpeza e conservação': [
+      'Limpeza de piscinões municipais',
+    ],
+    'Arborização (viário)': [
+      'Poda de árvores',
+      'Remoção de árvores',
+      'Liberação de via',
+    ],
+    'Praças e jardins': [
+      'Manutenção de praça',
+      'Limpeza e conservação (focado na praça)',
+      'Jardinagem / paisagismo (plantio de grama, canteiros, limpeza)',
+      'Poda em praças e parques (levantamento de copa, limpeza de galhos)',
+    ],
+    'Obras, reformas e apoio': [
+      'Manutenção de equipamentos públicos (ideal para reportar brinquedos e aparelhos de ginástica quebrados)',
+    ],
+  };
 
   @override
   void initState() {
@@ -51,17 +95,37 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
 
   Future<void> _carregarCategorias() async {
     try {
-      final response = await Supabase.instance.client
+      final responseCategorias = await Supabase.instance.client
           .from('categorias')
           .select('id, nome')
           .order('id', ascending: true);
       final Map<int, String> categoriasCarregadas = {};
-      for (var row in response) {
+      for (var row in responseCategorias) {
         categoriasCarregadas[row['id'] as int] = row['nome'] as String;
       }
+
+      // Tenta buscar serviços cadastrados na tabela 'servicos' do Supabase
+      final Map<int, List<String>> servicosCarregados = {};
+      try {
+        final responseServicos = await Supabase.instance.client
+            .from('servicos')
+            .select('categoria_id, nome')
+            .order('id', ascending: true);
+        for (var row in responseServicos) {
+          final catId = row['categoria_id'] as int;
+          final servicoNome = row['nome'] as String;
+          servicosCarregados.putIfAbsent(catId, () => []).add(servicoNome);
+        }
+      } catch (_) {
+        // Fallback para o catálogo local caso a tabela ainda não exista no Supabase
+      }
+
       if (mounted) {
         setState(() {
           _categorias = categoriasCarregadas;
+          if (servicosCarregados.isNotEmpty) {
+            _servicosPorCategoriaId = servicosCarregados;
+          }
           _isLoadingCategorias = false;
         });
       }
@@ -249,7 +313,114 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                             ? const Icon(Icons.check, color: AppColors.primary)
                             : null,
                         onTap: () {
-                          setState(() => _categoriaId = e.key);
+                          setState(() {
+                            _categoriaId = e.key;
+                            _servicoSelecionado = null;
+                            _tituloController.clear();
+                          });
+                          Navigator.pop(context);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  Future<void> _abrirSelecaoServico() async {
+    FocusScope.of(context).unfocus();
+
+    if (_categoriaId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione primeiro uma categoria.')),
+      );
+      return;
+    }
+
+    final categoriaNome = _categorias[_categoriaId];
+    final servicos = _servicosPorCategoriaId[_categoriaId] ??
+        _servicosPorCategoria[categoriaNome] ??
+        switch (categoriaNome) {
+          'Manutenção de Via pública' =>
+            _servicosPorCategoria['Pavimentação e vias'],
+          'Limpeza Urbana' => _servicosPorCategoria['Coleta de resíduos'],
+          'Mobiliário Urbano' => _servicosPorCategoria['Mobiliário de limpeza'],
+          _ => null,
+        } ??
+        [];
+
+    if (servicos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nenhum serviço disponível para esta categoria.'),
+        ),
+      );
+      return;
+    }
+
+    final ctx = _servicoKey.currentContext;
+    if (ctx != null && ctx.mounted) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+    }
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        builder: (context) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Selecione o serviço',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkBlue,
+                        ),
+                  ),
+                ),
+                const Divider(height: 1),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: servicos.map((servico) {
+                      final isSelected = _servicoSelecionado == servico;
+                      return ListTile(
+                        title: Text(
+                          servico,
+                          style: TextStyle(
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(Icons.check, color: AppColors.primary)
+                            : null,
+                        onTap: () {
+                          setState(() {
+                            _servicoSelecionado = servico;
+                            _tituloController.text = servico;
+                          });
                           Navigator.pop(context);
                         },
                       );
@@ -361,6 +532,12 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       ).showSnackBar(const SnackBar(content: Text('Selecione uma categoria.')));
       return;
     }
+    if (_servicoSelecionado == null || _servicoSelecionado!.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Selecione um serviço.')));
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -380,7 +557,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
             ),
             'endereco': _enderecoController.text,
             'categoria_id': _categoriaId,
-            'titulo': _tituloController.text,
+            'titulo': _servicoSelecionado ?? _tituloController.text,
             'descricao': _descricaoController.text,
             'fotos': urlsFotos,
           })
@@ -528,7 +705,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              _buildLabel('Categoria do Problema'),
+              _buildLabel('Categoria'),
               AppTextField(
                 key: _categoriaKey,
                 readOnly: true,
@@ -543,13 +720,22 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                     _categoriaId == null ? 'Selecione uma categoria' : null,
               ),
               const SizedBox(height: 16),
-              _buildLabel('Título'),
+              _buildLabel('Serviço'),
               AppTextField(
-                controller: _tituloController,
-                hintText: 'Ex: Buraco na via',
-                textCapitalization: TextCapitalization.sentences,
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Informe um título' : null,
+                key: _servicoKey,
+                readOnly: true,
+                hintText: _categoriaId == null
+                    ? 'Selecione a categoria primeiro'
+                    : 'Selecione o serviço',
+                controller: TextEditingController(
+                  text: _servicoSelecionado ?? '',
+                ),
+                suffixIcon:
+                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                onTap: _categoriaId == null ? null : _abrirSelecaoServico,
+                validator: (val) => _servicoSelecionado == null
+                    ? 'Selecione um serviço'
+                    : null,
               ),
               const SizedBox(height: 16),
               _buildLabel('Descrição detalhada'),

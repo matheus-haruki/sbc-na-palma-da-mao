@@ -1,0 +1,117 @@
+import 'package:dio/dio.dart';
+import 'package:palma_da_mao/modules/debitos_transito/models/debito_model.dart';
+import 'package:palma_da_mao/modules/debitos_transito/models/guia_pagamento_model.dart';
+
+class TransitoRepository {
+  final Dio _dio;
+
+  TransitoRepository(this._dio);
+
+  Future<List<DebitoModel>> consultarDebitos(String cpf) async {
+    try {
+      final response = await _dio.post(
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/sistema-externo/consulta-lancamentos',
+        data: {
+          "cpf": cpf,
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+        },
+      );
+
+      // Verifica se a resposta não é nula e se é um Map (JSON válido)
+      if (response.data != null && response.data is Map) {
+        if (response.data['normal'] != null) {
+          final list = response.data['normal'] as List;
+          // Filtra apenas os débitos que são multas de trânsito
+          return list
+              .map((e) => DebitoModel.fromJson(e))
+              .where((debito) => debito.tipo == 'M.TRANS')
+              .toList();
+        }
+      }
+      
+      return [];
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 500) {
+        throw Exception('Servidor indisponível (Erro 500). Tente novamente mais tarde.');
+      }
+      throw Exception('Falha na comunicação com o servidor: ${e.message}');
+    } catch (e) {
+      throw Exception('Formato de resposta inválido ou erro inesperado.');
+    }
+  }
+
+  Future<Map<String, dynamic>> consultarDetalhes(String lancamento) async {
+    try {
+      final response = await _dio.post(
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-detalhes-por-lancamento',
+        data: {
+          "lancamento": lancamento,
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+        },
+      );
+
+      if (response.data != null && response.data is Map) {
+        return response.data as Map<String, dynamic>;
+      }
+      
+      throw Exception('Resposta vazia');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 500) {
+        throw Exception('Servidor indisponível (Erro 500). Tente novamente mais tarde.');
+      }
+      throw Exception('Falha na comunicação com o servidor: ${e.message}');
+    } catch (e) {
+      throw Exception('Formato de resposta inválido ou erro inesperado.');
+    }
+  }
+
+  Future<GuiaPagamentoModel> gerarBoletoTotal(String lancamento) async {
+    try {
+      final response = await _dio.post(
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-boleto',
+        data: {
+          "lancamento": lancamento,
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+        },
+      );
+
+      if (response.data != null && response.data is Map) {
+        return GuiaPagamentoModel.fromJson(response.data as Map<String, dynamic>);
+      }
+      throw Exception('Resposta vazia da guia de pagamento.');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 500) {
+        throw Exception('Servidor indisponível ao gerar a guia total.');
+      }
+      throw Exception('Falha ao gerar guia total: ${e.message}');
+    } catch (e) {
+      throw Exception('Erro ao processar guia de pagamento.');
+    }
+  }
+
+  Future<GuiaPagamentoModel> gerarBoletoParcela(String lancamento, int parcela) async {
+    try {
+      final response = await _dio.post(
+        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/emissao-de-boleto-por-parcela',
+        data: {
+          "lancamento": lancamento,
+          "parcela": parcela.toString(),
+          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+        },
+      );
+
+      if (response.data != null && response.data is Map) {
+        return GuiaPagamentoModel.fromJson(response.data as Map<String, dynamic>);
+      }
+      throw Exception('Resposta vazia do boleto específico.');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 500) {
+        throw Exception('Servidor indisponível ao gerar o boleto da parcela.');
+      }
+      throw Exception('Falha ao gerar boleto: ${e.message}');
+    } catch (e) {
+      throw Exception('Erro ao processar boleto específico.');
+    }
+  }
+}
+

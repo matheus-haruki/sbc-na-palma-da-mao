@@ -7,6 +7,8 @@ import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 import 'package:palma_da_mao/modules/iptu/presentational/controllers/iptu_cubit.dart';
 import 'package:palma_da_mao/modules/iptu/presentational/controllers/iptu_state.dart';
+import 'package:palma_da_mao/core/components/app_shimmer_list.dart';
+import 'package:palma_da_mao/core/components/app_empty_state.dart';
 import 'package:palma_da_mao/modules/iptu/models/debito_model.dart';
 
 class IptuPage extends StatefulWidget {
@@ -46,12 +48,33 @@ class _IptuPageState extends State<IptuPage> {
   }
 
   String _extrairAno(DebitoModel debito) {
-    if (debito.vencimento != null && debito.vencimento!.length >= 4) {
-      final partes = debito.vencimento!.split('/');
-      if (partes.length == 3) {
-        return partes[2];
+    // 1. Tenta extrair o ano do exercício diretamente pelo número do lançamento
+    // Padrão PMSBC: 3 dígitos do tributo (ex: 101) + 2 dígitos do ano (ex: 24 -> 2024)
+    if (debito.lancamento != null && debito.lancamento!.length >= 5) {
+      final anoDoisDigitos = debito.lancamento!.substring(3, 5);
+      final anoNum = int.tryParse(anoDoisDigitos);
+      if (anoNum != null) {
+        final anoCompleto = anoNum >= 80 ? 1900 + anoNum : 2000 + anoNum;
+        return anoCompleto.toString();
       }
     }
+
+    // 2. Fallback pela data de vencimento (caso venha preenchida com barras ou hífens)
+    if (debito.vencimento != null) {
+      final limpo = debito.vencimento!;
+      if (limpo.contains('/')) {
+        final partes = limpo.split('/');
+        if (partes.length == 3 && partes[2].length == 4) {
+          return partes[2];
+        }
+      } else if (limpo.contains('-')) {
+        final partes = limpo.split('-');
+        if (partes.length == 3 && partes[2].length == 4) {
+          return partes[2];
+        }
+      }
+    }
+
     return debito.vencimento ?? '-';
   }
 
@@ -61,56 +84,63 @@ class _IptuPageState extends State<IptuPage> {
 
     return AppStandardPage(
       title: 'Consulta de Débitos - IPTU',
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Informe o CPF do proprietário do imóvel:',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.secondary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            CpfTextField(
-              controller: _cpfController,
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey.shade300,
-                  disabledForegroundColor: Colors.grey.shade500,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Informe o CPF do proprietário do imóvel:',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.secondary,
                   ),
                 ),
-                onPressed: _isButtonEnabled
-                    ? () {
-                        FocusScope.of(context).unfocus();
-                        final unmaskedText = _cpfController.text.replaceAll(RegExp(r'[^0-9]'), '');
-                        _cubit.buscarDebitos(unmaskedText);
-                      }
-                    : null,
-                child: const Text(
-                  'Buscar Débitos',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                const SizedBox(height: 12),
+                CpfTextField(
+                  controller: _cpfController,
                 ),
-              ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledForegroundColor: Colors.grey.shade500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: _isButtonEnabled
+                        ? () {
+                            FocusScope.of(context).unfocus();
+                            final unmaskedText = _cpfController.text
+                                .replaceAll(RegExp(r'[^0-9]'), '');
+                            _cubit.buscarDebitos(unmaskedText);
+                          }
+                        : null,
+                    child: const Text(
+                      'Buscar Débitos',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: BlocBuilder<IptuCubit, IptuState>(
-                bloc: _cubit,
-                builder: (context, state) {
-                  if (state is IptuLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is IptuError) {
+          ),
+          Expanded(
+            child: BlocBuilder<IptuCubit, IptuState>(
+              bloc: _cubit,
+              builder: (context, state) {
+                if (state is IptuLoading) {
+                  return const AppShimmerList(
+                    padding: EdgeInsets.all(16),
+                  );
+                } else if (state is IptuError) {
                     return Center(
                       child: Text(
                         state.message,
@@ -120,23 +150,23 @@ class _IptuPageState extends State<IptuPage> {
                     );
                   } else if (state is IptuSuccess) {
                     if (state.debitos.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'Nenhum débito encontrado.',
-                          style: TextStyle(fontSize: 16),
-                        ),
+                      return const AppEmptyState(
+                        message: 'Nenhum débito encontrado.',
                       );
                     }
                     return ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.all(16),
                       itemCount: state.debitos.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final debito = state.debitos[index];
                         final ano = _extrairAno(debito);
                         final origem = debito.tipo ?? 'Débito';
                         final valorFormatado = debito.valorAtual != null
-                            ? debito.valorAtual!.toStringAsFixed(2).replaceAll('.', ',')
+                            ? debito.valorAtual!
+                                .toStringAsFixed(2)
+                                .replaceAll('.', ',')
                             : '-';
 
                         return Container(
@@ -170,10 +200,12 @@ class _IptuPageState extends State<IptuPage> {
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 origem.toUpperCase(),
@@ -184,10 +216,14 @@ class _IptuPageState extends State<IptuPage> {
                                                 ),
                                               ),
                                               Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 4),
                                                 decoration: BoxDecoration(
                                                   color: Colors.grey.shade100,
-                                                  borderRadius: BorderRadius.circular(12),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
                                                 ),
                                                 child: Text(
                                                   'Ano $ano',
@@ -262,7 +298,6 @@ class _IptuPageState extends State<IptuPage> {
             ),
           ],
         ),
-      ),
     );
   }
 }
