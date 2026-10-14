@@ -49,12 +49,12 @@ class HomeCubit extends Cubit<HomeState> {
           ),
         ],
         maisUtilizados: [
-          AtalhoModel(
-            idCategoria: 'tributos',
-            titulo: '2ª Via do IPTU',
-            iconePath: AppAssets.iconeHome,
-            rota: '/iptu',
-          ),
+          // AtalhoModel(
+          //   idCategoria: 'tributos',
+          //   titulo: '2ª Via do IPTU',
+          //   iconePath: AppAssets.iconeHome,
+          //   rota: '/iptu',
+          // ),
           AtalhoModel(
             idCategoria:
                 'cidadania', // Vai abrir a lista de Cultura (onde colocamos as Notícias no JSON)
@@ -63,14 +63,14 @@ class HomeCubit extends Cubit<HomeState> {
                 .iconeZeladoria, // Troque se tiver um ícone específico para notícias
             rota: '/zeladoria',
           ),
-          AtalhoModel(
-            idCategoria:
-                'cidadania', // Cidadania geralmente engloba atendimento/ouvidoria
-            titulo: 'Multas de Trânsito',
-            iconePath: AppAssets
-                .iconeCarro, // Troque se tiver um ícone de balão de fala/chat
-            rota: '/transito',
-          ),
+          // AtalhoModel(
+          //   idCategoria:
+          //       'cidadania', // Cidadania geralmente engloba atendimento/ouvidoria
+          //   titulo: 'Multas de Trânsito',
+          //   iconePath: AppAssets
+          //       .iconeCarro, // Troque se tiver um ícone de balão de fala/chat
+          //   rota: '/transito',
+          // ),
         ],
       ),
     );

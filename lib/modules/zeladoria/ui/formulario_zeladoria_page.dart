@@ -98,6 +98,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       final responseCategorias = await Supabase.instance.client
           .from('categorias')
           .select('id, nome')
+          .eq('ativo', true)
           .order('id', ascending: true);
       final Map<int, String> categoriasCarregadas = {};
       for (var row in responseCategorias) {
@@ -107,10 +108,19 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       // Tenta buscar serviços cadastrados na tabela 'servicos' do Supabase
       final Map<int, List<String>> servicosCarregados = {};
       try {
-        final responseServicos = await Supabase.instance.client
-            .from('servicos')
-            .select('categoria_id, nome')
-            .order('id', ascending: true);
+        List<dynamic> responseServicos;
+        try {
+          responseServicos = await Supabase.instance.client
+              .from('servicos')
+              .select('categoria_id, nome')
+              .eq('ativo', true)
+              .order('id', ascending: true);
+        } catch (_) {
+          responseServicos = await Supabase.instance.client
+              .from('servicos')
+              .select('categoria_id, nome')
+              .order('id', ascending: true);
+        }
         for (var row in responseServicos) {
           final catId = row['categoria_id'] as int;
           final servicoNome = row['nome'] as String;
@@ -300,14 +310,15 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                       return ListTile(
                         title: Text(
                           e.value,
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textPrimary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textPrimary,
+                                  ),
                         ),
                         trailing: isSelected
                             ? const Icon(Icons.check, color: AppColors.primary)
@@ -404,14 +415,15 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                       return ListTile(
                         title: Text(
                           servico,
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                            color: isSelected
-                                ? AppColors.primary
-                                : AppColors.textPrimary,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textPrimary,
+                                  ),
                         ),
                         trailing: isSelected
                             ? const Icon(Icons.check, color: AppColors.primary)
@@ -570,7 +582,8 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
         AppSuccessModal.show(
           context,
           title: 'Solicitação Enviada!',
-          message: 'Sua solicitação foi registrada com sucesso. Anote o número do seu protocolo:',
+          message:
+              'Sua solicitação foi registrada com sucesso. Anote o número do seu protocolo:',
           highlightedText: protocolo.toString(),
           bottomMessage: 'Aguarde o andamento da análise.',
           onPressed: () {
@@ -620,246 +633,243 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Registre um problema na cidade',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.darkBlue,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildLabel('CPF do Solicitante'),
-              CpfTextField(controller: _cpfController),
-              const SizedBox(height: 16),
-              _buildLabel('Celular (WhatsApp)'),
-              AppTextField(
-                controller: _celularController,
-                keyboardType: TextInputType.phone,
-                inputFormatters: [_celularFormatter],
-                hintText: '(XX) XXXXX-XXXX',
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return 'Informe o celular';
-                  }
-                  if (val.length < 14) {
-                    return 'Informe um celular válido';
-                  }
-                  return null;
-                },
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                child: Text(
-                  'Este número será utilizado para enviar o protocolo e as atualizações de status desta solicitação pelo WhatsApp.',
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Registre um problema na cidade',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkBlue,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Endereço do Problema'),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _enderecoController,
-                      hintText: 'Digite o endereço...',
-                      validator: (val) => (val == null || val.isEmpty)
-                          ? 'Informe o endereço'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: _isFetchingLocation ? null : _obterEnderecoAtual,
-                    child: Container(
-                      height: 52,
-                      width: 52,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: _isFetchingLocation
-                          ? const Padding(
-                              padding: EdgeInsets.all(14.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.location_pin,
-                              color: Colors.white,
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Categoria'),
-              AppTextField(
-                key: _categoriaKey,
-                readOnly: true,
-                hintText: 'Selecione uma categoria',
-                controller: TextEditingController(
-                  text: _categoriaId != null ? _categorias[_categoriaId] : '',
-                ),
-                suffixIcon:
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                onTap: _isLoadingCategorias ? null : _abrirSelecaoCategoria,
-                validator: (val) =>
-                    _categoriaId == null ? 'Selecione uma categoria' : null,
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Serviço'),
-              AppTextField(
-                key: _servicoKey,
-                readOnly: true,
-                hintText: _categoriaId == null
-                    ? 'Selecione a categoria primeiro'
-                    : 'Selecione o serviço',
-                controller: TextEditingController(
-                  text: _servicoSelecionado ?? '',
-                ),
-                suffixIcon:
-                    const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                onTap: _categoriaId == null ? null : _abrirSelecaoServico,
-                validator: (val) => _servicoSelecionado == null
-                    ? 'Selecione um serviço'
-                    : null,
-              ),
-              const SizedBox(height: 16),
-              _buildLabel('Descrição detalhada'),
-              AppTextField(
-                key: _descricaoKey,
-                controller: _descricaoController,
-                hintText: 'Explique o problema detalhadamente...',
-                alignLabelWithHint: true,
-                minLines: 3,
-                maxLines: 6,
-                maxLength: 500,
-                textCapitalization: TextCapitalization.sentences,
-                onTap: () {
-                  Future.delayed(const Duration(milliseconds: 300), () {
-                    if (!mounted) return;
-                    final ctx = _descricaoKey.currentContext;
-                    if (ctx != null && ctx.mounted) {
-                      Scrollable.ensureVisible(
-                        ctx,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        alignment: 0.2, // Rola para deixar visível
-                      );
+                const SizedBox(height: 24),
+                _buildLabel('CPF do Solicitante'),
+                CpfTextField(controller: _cpfController),
+                const SizedBox(height: 16),
+                _buildLabel('Celular (WhatsApp)'),
+                AppTextField(
+                  controller: _celularController,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [_celularFormatter],
+                  hintText: '(11) 99999-9999',
+                  validator: (val) {
+                    if (val == null || val.isEmpty) {
+                      return 'Informe o celular';
                     }
-                  });
-                },
-                validator: (val) =>
-                    (val == null || val.isEmpty) ? 'Descreva o problema' : null,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'Fotos (Até 3)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ..._fotos.map((foto) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(foto.path),
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
+                    if (val.length < 14) {
+                      return 'Informe um celular válido';
+                    }
+                    return null;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                  child: Text(
+                    'Este número será utilizado para enviar o protocolo e as atualizações de status desta solicitação pelo WhatsApp.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Endereço do Problema'),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: _enderecoController,
+                        hintText: 'Digite o endereço...',
+                        validator: (val) => (val == null || val.isEmpty)
+                            ? 'Informe o endereço'
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: _isFetchingLocation ? null : _obterEnderecoAtual,
+                      child: Container(
+                        height: 52,
+                        width: 52,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        Positioned(
-                          right: -8,
-                          top: -8,
-                          child: InkWell(
-                            onTap: () => setState(() => _fotos.remove(foto)),
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
+                        child: _isFetchingLocation
+                            ? const Padding(
+                                padding: EdgeInsets.all(14.0),
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.location_pin,
                                 color: Colors.white,
-                                size: 20,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Categoria'),
+                AppTextField(
+                  key: _categoriaKey,
+                  readOnly: true,
+                  hintText: 'Selecione uma categoria',
+                  controller: TextEditingController(
+                    text: _categoriaId != null ? _categorias[_categoriaId] : '',
+                  ),
+                  suffixIcon:
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  onTap: _isLoadingCategorias ? null : _abrirSelecaoCategoria,
+                  validator: (val) =>
+                      _categoriaId == null ? 'Selecione uma categoria' : null,
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Serviço'),
+                AppTextField(
+                  key: _servicoKey,
+                  readOnly: true,
+                  hintText: _categoriaId == null
+                      ? 'Selecione a categoria primeiro'
+                      : 'Selecione o serviço',
+                  controller: TextEditingController(
+                    text: _servicoSelecionado ?? '',
+                  ),
+                  suffixIcon:
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                  onTap: _categoriaId == null ? null : _abrirSelecaoServico,
+                  validator: (val) => _servicoSelecionado == null
+                      ? 'Selecione um serviço'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Descrição detalhada'),
+                AppTextField(
+                  key: _descricaoKey,
+                  controller: _descricaoController,
+                  hintText: 'Explique o problema detalhadamente...',
+                  alignLabelWithHint: true,
+                  minLines: 3,
+                  maxLines: 6,
+                  maxLength: 500,
+                  textCapitalization: TextCapitalization.sentences,
+                  onTap: () {
+                    Future.delayed(const Duration(milliseconds: 300), () {
+                      if (!mounted) return;
+                      final ctx = _descricaoKey.currentContext;
+                      if (ctx != null && ctx.mounted) {
+                        Scrollable.ensureVisible(
+                          ctx,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          alignment: 0.2, // Rola para deixar visível
+                        );
+                      }
+                    });
+                  },
+                  validator: (val) => (val == null || val.isEmpty)
+                      ? 'Descreva o problema'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                _buildLabel('Fotos (Até 3)'),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ..._fotos.map((foto) {
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(foto.path),
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            right: -8,
+                            top: -8,
+                            child: InkWell(
+                              onTap: () => setState(() => _fotos.remove(foto)),
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
-                  if (_fotos.length < 3)
-                    InkWell(
-                      onTap: _abrirOpcoesDeFoto,
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.grey.shade400,
-                            style: BorderStyle.solid,
+                        ],
+                      );
+                    }),
+                    if (_fotos.length < 3)
+                      InkWell(
+                        onTap: _abrirOpcoesDeFoto,
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.grey.shade400,
+                              style: BorderStyle.solid,
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.add_a_photo,
-                          color: Colors.grey,
-                          size: 32,
+                          child: const Icon(
+                            Icons.add_a_photo,
+                            color: Colors.grey,
+                            size: 32,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _enviarSolicitacao,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Enviar Solicitação',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 32),
+                SizedBox(
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _enviarSolicitacao,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Enviar Solicitação',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
