@@ -185,7 +185,7 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
                                       Border.all(color: Colors.grey.shade200),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.03),
+                                      color: Colors.black.withValues(alpha: 0.03),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -218,14 +218,14 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
                                                   vertical: 4,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color: color.withOpacity(0.1),
+                                                  color: color.withValues(alpha: 0.1),
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                     12,
                                                   ),
                                                   border: Border.all(
                                                     color:
-                                                        color.withOpacity(0.3),
+                                                        color.withValues(alpha: 0.3),
                                                   ),
                                                 ),
                                                 child: Text(

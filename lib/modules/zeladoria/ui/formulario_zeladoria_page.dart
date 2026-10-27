@@ -865,7 +865,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 48),
               ],
             ),
           ),
