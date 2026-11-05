@@ -458,51 +458,6 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: BlocBuilder<TransitoGuiaCubit, TransitoGuiaState>(
-              bloc: _guiaCubit,
-              builder: (context, guiaState) {
-                final isLoading = guiaState is TransitoGuiaLoading;
-                return ElevatedButton.icon(
-                  onPressed: isLoading ? null : () {
-                    if (parcela.numeroParcela != null) {
-                      _abrirModalGuia(parcela: parcela.numeroParcela!);
-                    }
-                  },
-                  icon: isLoading ? const SizedBox() : SvgPicture.asset(
-                    'assets/icon/barcode.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  label: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                        )
-                      : const Text(
-                          'Gerar Boleto',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
         ],
       ),
     );

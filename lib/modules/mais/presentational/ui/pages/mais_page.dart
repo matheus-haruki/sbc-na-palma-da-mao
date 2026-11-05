@@ -77,11 +77,31 @@ class _MaisPageState extends State<MaisPage> {
                     children: [
                       // Substitua pelo seu asset de logo
                       Image.asset(AppAssets.logo, height: 90),
+
                       const SizedBox(height: 60),
                       Text(
-                        'Versão 3.0.0\nDesenvolvido por DTI - PMSBC',
+                        'Desenvolvido por:',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodySmall,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'tecnocomp',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Tecnocomp',
+                              fontSize: 20,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Image.asset(
+                            AppAssets.tecnocompLogo,
+                            height: 30,
+                          ),
+                        ],
                       ),
                     ],
                   ),
