@@ -17,11 +17,11 @@ class HomeCubit extends Cubit<HomeState> {
     emit(
       HomeSuccess(
         atalhos: [
-          AtalhoModel(
-            idCategoria: 'saude',
-            titulo: 'Saúde',
-            iconePath: AppAssets.iconeSaude2,
-          ),
+          // AtalhoModel(
+          //   idCategoria: 'saude',
+          //   titulo: 'Saúde',
+          //   iconePath: AppAssets.iconeSaude2,
+          // ),
           AtalhoModel(
             idCategoria: 'tributos',
             titulo: 'Tributos',
@@ -42,11 +42,11 @@ class HomeCubit extends Cubit<HomeState> {
             titulo: 'Cultura e Novidades',
             iconePath: AppAssets.iconeCultura,
           ),
-          AtalhoModel(
-            idCategoria: 'cidadania',
-            titulo: 'Cidadania e Perfil',
-            iconePath: AppAssets.iconePessoa,
-          ),
+          // AtalhoModel(
+          //   idCategoria: 'cidadania',
+          //   titulo: 'Cidadania e Perfil',
+          //   iconePath: AppAssets.iconePessoa,
+          // ),
         ],
         maisUtilizados: [
           AtalhoModel(
