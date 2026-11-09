@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:palma_da_mao/modules/debitos_transito/models/parcela_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
