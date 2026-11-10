@@ -11,12 +11,14 @@ class TransitoDetalhesSuccess extends TransitoDetalhesState {
   final ParcelaModel? proximaParcela;
   final List<ParcelaModel> parcelasFuturas;
   final List<ParcelaModel> parcelasVencidas;
+  final Map<String, dynamic>? dadosComplementares;
 
   TransitoDetalhesSuccess({
     required this.parcelasPagas,
     required this.proximaParcela,
     required this.parcelasFuturas,
     required this.parcelasVencidas,
+    this.dadosComplementares,
   });
 }
 

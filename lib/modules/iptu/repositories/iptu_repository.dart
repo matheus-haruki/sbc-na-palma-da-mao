@@ -61,7 +61,11 @@ class IptuRepository {
     }
   }
 
-  Future<GuiaPagamentoModel> gerarBoletoTotal(String lancamento) async {
+  Future<GuiaPagamentoModel> gerarBoletoTotal(
+    String lancamento, {
+    Map<String, dynamic>? dadosComplementares,
+    String? parcelasDescricao,
+  }) async {
     try {
       final response = await _dio.post(
         'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-boleto',
@@ -72,7 +76,12 @@ class IptuRepository {
       );
 
       if (response.data != null && response.data is Map) {
-        return GuiaPagamentoModel.fromJson(response.data as Map<String, dynamic>);
+        return GuiaPagamentoModel.fromJson(
+          response.data as Map<String, dynamic>,
+          lancamento: lancamento,
+          parcelasDescricao: parcelasDescricao,
+          dadosComplementares: dadosComplementares,
+        );
       }
       throw Exception('Resposta vazia da guia de pagamento.');
     } on DioException catch (e) {
@@ -85,7 +94,13 @@ class IptuRepository {
     }
   }
 
-  Future<GuiaPagamentoModel> gerarBoletoParcela(String lancamento, int parcela) async {
+  Future<GuiaPagamentoModel> gerarBoletoParcela(
+    String lancamento, 
+    int parcela, {
+    Map<String, dynamic>? dadosComplementares,
+    String? parcelasDescricao,
+    String? valorEstimado,
+  }) async {
     try {
       final response = await _dio.post(
         'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/emissao-de-boleto-por-parcela',
@@ -97,7 +112,13 @@ class IptuRepository {
       );
 
       if (response.data != null && response.data is Map) {
-        return GuiaPagamentoModel.fromJson(response.data as Map<String, dynamic>);
+        return GuiaPagamentoModel.fromJson(
+          response.data as Map<String, dynamic>,
+          lancamento: lancamento,
+          parcelasDescricao: parcelasDescricao ?? 'Parcela $parcela',
+          dadosComplementares: dadosComplementares,
+          valorEstimado: valorEstimado,
+        );
       }
       throw Exception('Resposta vazia do boleto específico.');
     } on DioException catch (e) {

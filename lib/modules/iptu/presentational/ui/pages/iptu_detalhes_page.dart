@@ -35,11 +35,63 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
     _cubit.buscarDetalhes(widget.lancamento);
   }
 
-  void _abrirModalGuia({int? parcela}) {
+  void _abrirModalGuia({int? parcela, double? valorParcela}) {
+    Map<String, dynamic>? dadosComplementares;
+    String? parcelasDescricao;
+    String? valorEstimado;
+
+    if (valorParcela != null && valorParcela > 0) {
+      valorEstimado = NumberFormat.currency(locale: 'pt_BR', symbol: '').format(valorParcela).trim();
+    }
+
+    final currentState = _cubit.state;
+    if (currentState is IptuDetalhesSuccess) {
+      dadosComplementares = currentState.dadosComplementares;
+      final totalParcelas = currentState.parcelasPagas.length +
+          (currentState.proximaParcela != null ? 1 : 0) +
+          currentState.parcelasFuturas.length +
+          currentState.parcelasVencidas.length;
+
+      if (parcela != null) {
+        parcelasDescricao = totalParcelas > 0
+            ? 'Parcela $parcela de $totalParcelas'
+            : 'Parcela $parcela';
+
+        if (valorEstimado == null) {
+          final todas = [
+            if (currentState.proximaParcela != null) currentState.proximaParcela!,
+            ...currentState.parcelasFuturas,
+            ...currentState.parcelasVencidas,
+            ...currentState.parcelasPagas,
+          ];
+          for (var p in todas) {
+            if (p.numeroParcela == parcela && p.valor > 0) {
+              valorEstimado = NumberFormat.currency(locale: 'pt_BR', symbol: '').format(p.valor).trim();
+              break;
+            }
+          }
+        }
+      } else {
+        parcelasDescricao = totalParcelas > 0
+            ? 'Todas as parcelas: de 01 à ${totalParcelas.toString().padLeft(2, '0')}'
+            : null;
+      }
+    }
+
     if (parcela != null) {
-      _guiaCubit.emitirGuiaParcela(widget.lancamento, parcela);
+      _guiaCubit.emitirGuiaParcela(
+        widget.lancamento,
+        parcela,
+        dadosComplementares: dadosComplementares,
+        parcelasDescricao: parcelasDescricao,
+        valorEstimado: valorEstimado,
+      );
     } else {
-      _guiaCubit.emitirGuiaTotal(widget.lancamento);
+      _guiaCubit.emitirGuiaTotal(
+        widget.lancamento,
+        dadosComplementares: dadosComplementares,
+        parcelasDescricao: parcelasDescricao,
+      );
     }
 
     showDialog(
@@ -140,12 +192,12 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                                       guiaState.pdfBytes!, 
                                       name: 'IPTU_SBC_Lancamento.pdf',
                                       mimeType: 'application/pdf',
-                                    )
-                                  ], text: 'Segue a guia de pagamento do IPTU.');
+                                    ),
+                                  ]);
                                 }
                               },
                               icon: const Icon(Icons.picture_as_pdf),
-                              label: const Text('Salvar Documento (PDF)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              label: const Text('Salvar Documento', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.secondary,
                                 side: const BorderSide(color: AppColors.secondary, width: 1.5),
@@ -469,7 +521,10 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                 return ElevatedButton.icon(
                   onPressed: isLoading ? null : () {
                     if (parcela.numeroParcela != null) {
-                      _abrirModalGuia(parcela: parcela.numeroParcela!);
+                      _abrirModalGuia(
+                        parcela: parcela.numeroParcela!,
+                        valorParcela: parcela.valor,
+                      );
                     }
                   },
                   icon: isLoading ? const SizedBox() : SvgPicture.asset(
@@ -568,7 +623,12 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                 SizedBox(
                   height: 28,
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: parcela.numeroParcela == null
+                        ? null
+                        : () => _abrirModalGuia(
+                              parcela: parcela.numeroParcela!,
+                              valorParcela: parcela.valor,
+                            ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       foregroundColor: AppColors.secondary,

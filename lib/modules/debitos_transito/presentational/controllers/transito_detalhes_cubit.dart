@@ -44,6 +44,7 @@ class TransitoDetalhesCubit extends Cubit<TransitoDetalhesState> {
         proximaParcela: proximaParcela,
         parcelasFuturas: parcelasFuturas,
         parcelasVencidas: parcelasVencidas,
+        dadosComplementares: detalhes,
       ));
     } catch (e, stacktrace) {
       debugPrint('Erro ao buscar detalhes do lançamento: $e');

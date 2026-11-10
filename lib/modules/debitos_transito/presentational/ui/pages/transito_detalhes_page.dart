@@ -34,11 +34,68 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
     _cubit.buscarDetalhes(widget.lancamento);
   }
 
-  void _abrirModalGuia({int? parcela}) {
+  void _abrirModalGuia({int? parcela, double? valorParcela}) {
+    Map<String, dynamic>? dadosComplementares;
+    String? parcelasDescricao;
+    String? valorEstimado;
+
+    if (valorParcela != null && valorParcela > 0) {
+      valorEstimado = NumberFormat.currency(locale: 'pt_BR', symbol: '')
+          .format(valorParcela)
+          .trim();
+    }
+
+    final currentState = _cubit.state;
+    if (currentState is TransitoDetalhesSuccess) {
+      dadosComplementares = currentState.dadosComplementares;
+      final totalParcelas = currentState.parcelasPagas.length +
+          (currentState.proximaParcela != null ? 1 : 0) +
+          currentState.parcelasFuturas.length +
+          currentState.parcelasVencidas.length;
+
+      if (parcela != null) {
+        parcelasDescricao = totalParcelas > 0
+            ? 'Parcela $parcela de $totalParcelas'
+            : 'Parcela $parcela';
+
+        if (valorEstimado == null) {
+          final todas = [
+            if (currentState.proximaParcela != null)
+              currentState.proximaParcela!,
+            ...currentState.parcelasFuturas,
+            ...currentState.parcelasVencidas,
+            ...currentState.parcelasPagas,
+          ];
+          for (var p in todas) {
+            if (p.numeroParcela == parcela && p.valor > 0) {
+              valorEstimado = NumberFormat.currency(locale: 'pt_BR', symbol: '')
+                  .format(p.valor)
+                  .trim();
+              break;
+            }
+          }
+        }
+      } else {
+        parcelasDescricao = totalParcelas > 0
+            ? 'Todas as parcelas: de 01 à ${totalParcelas.toString().padLeft(2, '0')}'
+            : null;
+      }
+    }
+
     if (parcela != null) {
-      _guiaCubit.emitirGuiaParcela(widget.lancamento, parcela);
+      _guiaCubit.emitirGuiaParcela(
+        widget.lancamento,
+        parcela,
+        dadosComplementares: dadosComplementares,
+        parcelasDescricao: parcelasDescricao,
+        valorEstimado: valorEstimado,
+      );
     } else {
-      _guiaCubit.emitirGuiaTotal(widget.lancamento);
+      _guiaCubit.emitirGuiaTotal(
+        widget.lancamento,
+        dadosComplementares: dadosComplementares,
+        parcelasDescricao: parcelasDescricao,
+      );
     }
 
     showDialog(
@@ -62,12 +119,15 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                       children: [
                         // Title
                         const Text(
-                          'Guia de Arrecadação - IPTU',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkBlue),
+                          'Guia de Arrecadação - Débitos de Trânsito',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.darkBlue),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
-                        
+
                         if (guiaState is TransitoGuiaLoading) ...[
                           const CircularProgressIndicator(),
                           const SizedBox(height: 16),
@@ -77,7 +137,8 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                             style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
                         ] else if (guiaState is TransitoGuiaError) ...[
-                          const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                          const Icon(Icons.error_outline,
+                              color: Colors.red, size: 48),
                           const SizedBox(height: 16),
                           Text(
                             guiaState.message,
@@ -92,41 +153,59 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                         ] else if (guiaState is TransitoGuiaSuccess) ...[
                           Container(
                             padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border:
+                                    Border.all(color: Colors.grey.shade200)),
                             child: Text(
                               guiaState.guia.linhaDigitavel,
-                              style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 1.5),
+                              style: const TextStyle(
+                                  fontFamily: 'Courier',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  letterSpacing: 1.5),
                               textAlign: TextAlign.center,
                             ),
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Primary Action: Copiar
                           SizedBox(
                             width: double.infinity,
                             height: 52,
                             child: ElevatedButton.icon(
-                              onPressed: isCopied ? null : () async {
-                                HapticFeedback.lightImpact();
-                                Clipboard.setData(ClipboardData(text: guiaState.guia.linhaDigitavel));
-                                setStateModal(() => isCopied = true);
-                                await Future.delayed(const Duration(seconds: 2));
-                                if (context.mounted) setStateModal(() => isCopied = false);
-                              },
-                              icon: Icon(isCopied ? Icons.check_circle : Icons.copy),
+                              onPressed: isCopied
+                                  ? null
+                                  : () async {
+                                      HapticFeedback.lightImpact();
+                                      Clipboard.setData(ClipboardData(
+                                          text: guiaState.guia.linhaDigitavel));
+                                      setStateModal(() => isCopied = true);
+                                      await Future.delayed(
+                                          const Duration(seconds: 2));
+                                      if (context.mounted)
+                                        setStateModal(() => isCopied = false);
+                                    },
+                              icon: Icon(
+                                  isCopied ? Icons.check_circle : Icons.copy),
                               label: Text(
                                 isCopied ? 'Copiado!' : 'Copiar Código',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: isCopied ? Colors.green : AppColors.secondary,
+                                backgroundColor: isCopied
+                                    ? Colors.green
+                                    : AppColors.secondary,
                                 foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
                           ),
                           const SizedBox(height: 12),
-                          
+
                           // Secondary Action: PDF
                           SizedBox(
                             width: double.infinity,
@@ -136,19 +215,24 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                                 if (guiaState.pdfBytes != null) {
                                   Share.shareXFiles([
                                     XFile.fromData(
-                                      guiaState.pdfBytes!, 
-                                      name: 'IPTU_SBC_Lancamento.pdf',
+                                      guiaState.pdfBytes!,
+                                      name: 'Transito_SBC_Lancamento.pdf',
                                       mimeType: 'application/pdf',
-                                    )
-                                  ], text: 'Segue a guia de pagamento do IPTU.');
+                                    ),
+                                  ]);
                                 }
                               },
                               icon: const Icon(Icons.picture_as_pdf),
-                              label: const Text('Salvar Documento (PDF)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              label: const Text('Salvar Documento',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.secondary,
-                                side: const BorderSide(color: AppColors.secondary, width: 1.5),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                side: const BorderSide(
+                                    color: AppColors.secondary, width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
                           ),
@@ -200,7 +284,8 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
       body: BlocBuilder<TransitoDetalhesCubit, TransitoDetalhesState>(
         bloc: _cubit,
         builder: (context, state) {
-          if (state is TransitoDetalhesLoading || state is TransitoDetalhesInitial) {
+          if (state is TransitoDetalhesLoading ||
+              state is TransitoDetalhesInitial) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: _buildShimmer(),
@@ -214,9 +299,10 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
               ),
             );
           } else if (state is TransitoDetalhesSuccess) {
-            final double valorTotalAberto = state.parcelasVencidas.fold(0.0, (s, p) => s + p.valor) +
-                (state.proximaParcela?.valor ?? 0.0) +
-                state.parcelasFuturas.fold(0.0, (s, p) => s + p.valor);
+            final double valorTotalAberto =
+                state.parcelasVencidas.fold(0.0, (s, p) => s + p.valor) +
+                    (state.proximaParcela?.valor ?? 0.0) +
+                    state.parcelasFuturas.fold(0.0, (s, p) => s + p.valor);
 
             return Column(
               children: [
@@ -253,7 +339,6 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                             ],
                           ),
                         ),
-
                       if (state.parcelasPagas.isNotEmpty)
                         Theme(
                           data: Theme.of(
@@ -280,10 +365,8 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                                 .toList(),
                           ),
                         ),
-
                       if (state.parcelasPagas.isNotEmpty)
                         const SizedBox(height: 24),
-
                       if (state.proximaParcela != null) ...[
                         const Text(
                           'Próximo Vencimento',
@@ -296,7 +379,6 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                         _buildHeroCard(state.proximaParcela!),
                         const SizedBox(height: 24),
                       ],
-
                       if (state.parcelasFuturas.isNotEmpty) ...[
                         const Text(
                           'Parcelas Futuras',
@@ -331,16 +413,19 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                       child: SizedBox(
                         width: double.infinity,
                         height: 54,
-                        child: BlocBuilder<TransitoGuiaCubit, TransitoGuiaState>(
+                        child:
+                            BlocBuilder<TransitoGuiaCubit, TransitoGuiaState>(
                           bloc: _guiaCubit,
                           builder: (context, guiaState) {
                             final isLoading = guiaState is TransitoGuiaLoading;
                             return ElevatedButton(
-                              onPressed: isLoading ? null : () => _abrirModalGuia(),
+                              onPressed:
+                                  isLoading ? null : () => _abrirModalGuia(),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.secondary,
                                 foregroundColor: Colors.white,
-                                disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.6),
+                                disabledBackgroundColor:
+                                    AppColors.secondary.withValues(alpha: 0.6),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -349,11 +434,15 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                                   ? const SizedBox(
                                       width: 24,
                                       height: 24,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                      child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2.5),
                                     )
                                   : Text(
                                       'Pagar Total - ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(valorTotalAberto)}',
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
                                     ),
                             );
                           },
@@ -522,7 +611,12 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                 SizedBox(
                   height: 28,
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: parcela.numeroParcela == null
+                        ? null
+                        : () => _abrirModalGuia(
+                              parcela: parcela.numeroParcela!,
+                              valorParcela: parcela.valor,
+                            ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       foregroundColor: AppColors.secondary,

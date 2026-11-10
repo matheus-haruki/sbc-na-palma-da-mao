@@ -97,7 +97,11 @@ class TransitoRepository {
     }
   }
 
-  Future<GuiaPagamentoModel> gerarBoletoTotal(String lancamento) async {
+  Future<GuiaPagamentoModel> gerarBoletoTotal(
+    String lancamento, {
+    Map<String, dynamic>? dadosComplementares,
+    String? parcelasDescricao,
+  }) async {
     try {
       // Em Homologação utiliza sistema-externo/consulta-boleto; em Produção chat-bot/consulta-boleto
       final url = useHomolog
@@ -113,7 +117,12 @@ class TransitoRepository {
       );
 
       if (response.data != null && response.data is Map) {
-        return GuiaPagamentoModel.fromJson(response.data as Map<String, dynamic>);
+        return GuiaPagamentoModel.fromJson(
+          response.data as Map<String, dynamic>,
+          lancamento: lancamento,
+          parcelasDescricao: parcelasDescricao,
+          dadosComplementares: dadosComplementares,
+        );
       }
       throw Exception('Resposta vazia da guia de pagamento.');
     } on DioException catch (e) {
@@ -126,7 +135,13 @@ class TransitoRepository {
     }
   }
 
-  Future<GuiaPagamentoModel> gerarBoletoParcela(String lancamento, int parcela) async {
+  Future<GuiaPagamentoModel> gerarBoletoParcela(
+    String lancamento, 
+    int parcela, {
+    Map<String, dynamic>? dadosComplementares,
+    String? parcelasDescricao,
+    String? valorEstimado,
+  }) async {
     try {
       final url = useHomolog
           ? '$baseUrl/sistema-externo/emissao-de-boleto-por-parcela'
@@ -142,7 +157,13 @@ class TransitoRepository {
       );
 
       if (response.data != null && response.data is Map) {
-        return GuiaPagamentoModel.fromJson(response.data as Map<String, dynamic>);
+        return GuiaPagamentoModel.fromJson(
+          response.data as Map<String, dynamic>,
+          lancamento: lancamento,
+          parcelasDescricao: parcelasDescricao ?? 'Parcela $parcela',
+          dadosComplementares: dadosComplementares,
+          valorEstimado: valorEstimado,
+        );
       }
       throw Exception('Resposta vazia do boleto específico.');
     } on DioException catch (e) {
