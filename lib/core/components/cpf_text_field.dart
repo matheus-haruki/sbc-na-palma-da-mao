@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:palma_da_mao/core/components/app_input_container.dart';
+import 'package:palma_da_mao/core/components/app_text_field.dart';
+import 'package:palma_da_mao/core/utils/cpf_validator.dart';
 
 class CpfTextField extends StatefulWidget {
   final TextEditingController controller;
   final Function(String)? onChanged;
   final FormFieldValidator<String>? validator;
+  final FocusNode? focusNode;
 
   const CpfTextField({
     super.key,
     required this.controller,
     this.onChanged,
     this.validator,
+    this.focusNode,
   });
 
   @override
@@ -32,43 +35,28 @@ class _CpfTextFieldState extends State<CpfTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return AppInputContainer(
-      child: TextFormField(
-        controller: widget.controller,
-        inputFormatters: [_cpfMaskFormatter],
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-        onChanged: (val) {
-          if (widget.onChanged != null) {
-            widget.onChanged!(_cpfMaskFormatter.getUnmaskedText());
-          }
-        },
-        validator: widget.validator ?? (val) {
-          if (val == null || _cpfMaskFormatter.getUnmaskedText().length != 11) {
-            return 'Digite um CPF válido com 11 números';
-          }
-          return null;
-        },
-        decoration: InputDecoration(
-          hintText: '000.000.000-00',
-          hintStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          errorBorder: InputBorder.none,
-          focusedErrorBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
-        keyboardType: TextInputType.number,
-      ),
+    return AppTextField(
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      keyboardType: TextInputType.number,
+      inputFormatters: [_cpfMaskFormatter],
+      hintText: '000.000.000-00',
+      onChanged: (val) {
+        if (widget.onChanged != null) {
+          widget.onChanged!(_cpfMaskFormatter.getUnmaskedText());
+        }
+      },
+      validator: widget.validator ??
+          (val) {
+            final unmasked = _cpfMaskFormatter.getUnmaskedText();
+            if (unmasked.isEmpty) {
+              return 'Informe o CPF';
+            }
+            if (!CpfValidator.isValid(unmasked)) {
+              return 'Digite um CPF válido';
+            }
+            return null;
+          },
     );
   }
 }

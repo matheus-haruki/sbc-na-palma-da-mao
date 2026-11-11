@@ -1,16 +1,23 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:palma_da_mao/core/components/app_standard_page.dart';
-import 'package:palma_da_mao/core/design_system/app_colors.dart';
-import 'package:palma_da_mao/core/components/cpf_text_field.dart';
-import 'package:palma_da_mao/core/components/app_text_field.dart';
-import 'package:palma_da_mao/core/components/app_success_modal.dart';
-import 'package:palma_da_mao/core/components/app_review_modal.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:palma_da_mao/core/components/app_standard_page.dart';
+import 'package:palma_da_mao/core/components/app_success_modal.dart';
+import 'package:palma_da_mao/core/components/app_text_field.dart';
+import 'package:palma_da_mao/core/components/cpf_text_field.dart';
+import 'package:palma_da_mao/core/components/keyboard_done_accessory.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/modules/zeladoria/models/categoria_model.dart';
+import 'package:palma_da_mao/modules/zeladoria/models/nova_solicitacao_dto.dart';
+import 'package:palma_da_mao/modules/zeladoria/models/servico_model.dart';
+import 'package:palma_da_mao/modules/zeladoria/presentational/controllers/zeladoria_form_cubit.dart';
+import 'package:palma_da_mao/modules/zeladoria/presentational/controllers/zeladoria_form_state.dart';
 
 class FormularioZeladoriaPage extends StatefulWidget {
   const FormularioZeladoriaPage({super.key});
@@ -22,252 +29,377 @@ class FormularioZeladoriaPage extends StatefulWidget {
 
 class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   final _formKey = GlobalKey<FormState>();
+
+  final _nomeController = TextEditingController();
   final _cpfController = TextEditingController();
   final _celularController = TextEditingController();
-  final _enderecoController = TextEditingController();
-  final _tituloController = TextEditingController();
+
+  final _cepController = TextEditingController();
+  final _logradouroController = TextEditingController();
+  final _numeroController = TextEditingController();
+  final _bairroController = TextEditingController();
+  final _categoriaController = TextEditingController();
+  final _servicoController = TextEditingController();
+  int? _bairroId;
+  String? _ultimoCepBuscado;
+  bool _isFetchingGps = false;
+
   final _descricaoController = TextEditingController();
+  final FocusNode _cpfFocusNode = FocusNode();
+  final FocusNode _celularFocusNode = FocusNode();
+  final FocusNode _cepFocusNode = FocusNode();
+  final FocusNode _numeroFocusNode = FocusNode();
 
   final _celularFormatter = MaskTextInputFormatter(
     mask: '(##) #####-####',
     filter: {"#": RegExp(r'[0-9]')},
   );
 
+  final _cepFormatter = MaskTextInputFormatter(
+    mask: '#####-###',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
   final GlobalKey _categoriaKey = GlobalKey();
   final GlobalKey _servicoKey = GlobalKey();
+  final GlobalKey _bairroKey = GlobalKey();
   final GlobalKey _descricaoKey = GlobalKey();
-  int? _categoriaId;
-  String? _servicoSelecionado;
+
   final List<XFile> _fotos = [];
-  bool _isLoading = false;
-  bool _isFetchingLocation = false;
 
-  Map<int, String> _categorias = {};
-  Map<int, List<String>> _servicosPorCategoriaId = {};
-  bool _isLoadingCategorias = true;
-
-  static const Map<String, List<String>> _servicosPorCategoria = {
-    'Pavimentação e vias': [
-      'Tapa-buracos',
-      'Recomposição de sarjetas / reparos gerais (guias e sarjetas)',
-    ],
-    'Drenagem': [
-      'Limpeza de boca de bueiros / boca de lobo',
-      'Troca de tampas de bueiros/ralos',
-      'Desassoreamento de córregos',
-    ],
-    'Coleta de resíduos': [
-      'Coleta e transporte de entulhos',
-      'Coleta e transporte de grandes objetos (bota-fora)',
-      'Coleta de resíduos sólidos domiciliares, feiras livres e varrição (Pode ser usado para reclamações de falha na coleta)',
-    ],
-    'Capina e roçada': [
-      'Capina e roçada de áreas não ajardinadas',
-    ],
-    'Mobiliário de limpeza': [
-      'Fornecimento/reposição de papeleiras',
-      'Substituição de contêineres',
-    ],
-    'Limpeza e conservação': [
-      'Limpeza de piscinões municipais',
-    ],
-    'Arborização (viário)': [
-      'Poda de árvores',
-      'Remoção de árvores',
-      'Liberação de via',
-    ],
-    'Praças e jardins': [
-      'Manutenção de praça',
-      'Limpeza e conservação (focado na praça)',
-      'Jardinagem / paisagismo (plantio de grama, canteiros, limpeza)',
-      'Poda em praças e parques (levantamento de copa, limpeza de galhos)',
-    ],
-    'Obras, reformas e apoio': [
-      'Manutenção de equipamentos públicos (ideal para reportar brinquedos e aparelhos de ginástica quebrados)',
-    ],
-  };
+  late final ZeladoriaFormCubit _cubit;
 
   @override
   void initState() {
     super.initState();
-    _carregarCategorias();
-  }
-
-  Future<void> _carregarCategorias() async {
-    try {
-      final responseCategorias = await Supabase.instance.client
-          .from('categorias')
-          .select('id, nome')
-          .eq('ativo', true)
-          .order('id', ascending: true);
-      final Map<int, String> categoriasCarregadas = {};
-      for (var row in responseCategorias) {
-        categoriasCarregadas[row['id'] as int] = row['nome'] as String;
-      }
-
-      // Tenta buscar serviços cadastrados na tabela 'servicos' do Supabase
-      final Map<int, List<String>> servicosCarregados = {};
-      try {
-        List<dynamic> responseServicos;
-        try {
-          responseServicos = await Supabase.instance.client
-              .from('servicos')
-              .select('categoria_id, nome')
-              .eq('ativo', true)
-              .order('id', ascending: true);
-        } catch (_) {
-          responseServicos = await Supabase.instance.client
-              .from('servicos')
-              .select('categoria_id, nome')
-              .order('id', ascending: true);
-        }
-        for (var row in responseServicos) {
-          final catId = row['categoria_id'] as int;
-          final servicoNome = row['nome'] as String;
-          servicosCarregados.putIfAbsent(catId, () => []).add(servicoNome);
-        }
-      } catch (_) {
-        // Fallback para o catálogo local caso a tabela ainda não exista no Supabase
-      }
-
-      if (mounted) {
-        setState(() {
-          _categorias = categoriasCarregadas;
-          if (servicosCarregados.isNotEmpty) {
-            _servicosPorCategoriaId = servicosCarregados;
-          }
-          _isLoadingCategorias = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoadingCategorias = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao carregar categorias: $e')),
-        );
-      }
-    }
+    _cubit = Modular.get<ZeladoriaFormCubit>();
+    _cubit.carregarCategorias();
+    _cepController.addListener(_handleCepControllerChanged);
+    _cepFocusNode.addListener(_handleCepFocusChanged);
   }
 
   @override
   void dispose() {
+    _cepController.removeListener(_handleCepControllerChanged);
+    _cepFocusNode.removeListener(_handleCepFocusChanged);
+    _nomeController.dispose();
     _cpfController.dispose();
     _celularController.dispose();
-    _enderecoController.dispose();
-    _tituloController.dispose();
+    _cepController.dispose();
+    _logradouroController.dispose();
+    _numeroController.dispose();
+    _bairroController.dispose();
+    _categoriaController.dispose();
+    _servicoController.dispose();
     _descricaoController.dispose();
+    _cpfFocusNode.dispose();
+    _celularFocusNode.dispose();
+    _cepFocusNode.dispose();
+    _numeroFocusNode.dispose();
     super.dispose();
   }
 
-  Future<void> _capturarLocalizacao(void Function(Position) onSucesso) async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception('Serviço de localização desativado.');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        throw Exception('Permissão de localização negada.');
+  void _handleCepFocusChanged() {
+    if (!_cepFocusNode.hasFocus) {
+      final cepLimpo = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (cepLimpo.isNotEmpty && cepLimpo.length < 8) {
+        _cubit.setErroCep('CEP inválido');
       }
     }
-
-    if (permission == LocationPermission.deniedForever) {
-      throw Exception('Permissão de localização negada permanentemente.');
-    }
-
-    final position = await Geolocator.getCurrentPosition();
-    onSucesso(position);
   }
 
-  Future<void> _obterEnderecoAtual() async {
-    setState(() {
-      _isFetchingLocation = true;
-      _enderecoController.text = "Buscando endereço...";
-    });
+  void _handleCepControllerChanged() {
+    final cepLimpo = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (_cubit.state.erroCep != null) {
+      _cubit.limparErroCep();
+    }
+    if (cepLimpo.length == 8 && cepLimpo != _ultimoCepBuscado) {
+      _ultimoCepBuscado = cepLimpo;
+      _cubit.buscarCep(cepLimpo);
+    }
+  }
+
+  void _buscarCepManual() {
+    final cepLimpo = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cepLimpo.length == 8) {
+      FocusScope.of(context).unfocus();
+      _ultimoCepBuscado = cepLimpo;
+      _cubit.buscarCep(cepLimpo);
+    } else if (cepLimpo.isNotEmpty) {
+      _cubit.setErroCep('CEP inválido');
+    }
+  }
+
+  Future<void> _obterEnderecoPorGps() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _isFetchingGps = true);
 
     try {
-      Position? position;
-      await _capturarLocalizacao((pos) => position = pos);
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        throw Exception('Serviço de localização/GPS está desativado.');
+      }
 
-      if (position != null) {
-        List<Placemark> placemarks = await Geocoding().placemarkFromCoordinates(
-          position!.latitude,
-          position!.longitude,
-        );
-
-        if (placemarks.isNotEmpty) {
-          Placemark place = placemarks[0];
-
-          final partes = <String>[];
-
-          // Logradouro e Número
-          if (place.street != null && place.street!.isNotEmpty) {
-            partes.add(place.street!);
-          } else if (place.thoroughfare != null &&
-              place.thoroughfare!.isNotEmpty) {
-            String rua = place.thoroughfare!;
-            if (place.subThoroughfare != null &&
-                place.subThoroughfare!.isNotEmpty) {
-              rua += ", ${place.subThoroughfare}";
-            }
-            partes.add(rua);
-          }
-
-          // Bairro
-          if (place.subLocality != null && place.subLocality!.isNotEmpty) {
-            partes.add(place.subLocality!);
-          }
-
-          // Cidade
-          if (place.locality != null && place.locality!.isNotEmpty) {
-            partes.add(place.locality!);
-          } else if (place.subAdministrativeArea != null &&
-              place.subAdministrativeArea!.isNotEmpty) {
-            partes.add(place.subAdministrativeArea!);
-          }
-
-          // UF / Estado
-          if (place.administrativeArea != null &&
-              place.administrativeArea!.isNotEmpty) {
-            partes.add(place.administrativeArea!);
-          }
-
-          if (partes.isNotEmpty) {
-            _enderecoController.text = partes.join(', ');
-          } else {
-            _enderecoController.text =
-                "Endereço não encontrado para este local";
-          }
-        } else {
-          _enderecoController.text =
-              "Lat: ${position!.latitude}, Lng: ${position!.longitude}";
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Permissão de localização negada.');
         }
       }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception(
+          'Permissão de localização negada permanentemente nas configurações.',
+        );
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+
+      final placemarks = await Geocoding().placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+
+        // 1. CEP: Se identificou, preenche e busca dados oficiais na prefeitura
+        final rawPostalCode =
+            place.postalCode?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
+        if (rawPostalCode.length == 8) {
+          _cepController.text =
+              '${rawPostalCode.substring(0, 5)}-${rawPostalCode.substring(5, 8)}';
+          _ultimoCepBuscado = rawPostalCode;
+          await _cubit.buscarCep(rawPostalCode);
+        }
+
+        // 2. Logradouro (rua/avenida)
+        final rua = place.thoroughfare ?? place.street ?? '';
+        if (rua.isNotEmpty) {
+          _logradouroController.text = rua;
+        }
+
+        // 3. Número
+        if (place.subThoroughfare != null &&
+            place.subThoroughfare!.trim().isNotEmpty) {
+          _numeroController.text = place.subThoroughfare!;
+        }
+
+        // 4. Bairro
+        final bairroGps = place.subLocality ?? '';
+        if (bairroGps.isNotEmpty) {
+          _bairroController.text = bairroGps;
+          await _cubit.buscarBairros(bairroGps);
+          if (_cubit.state.bairrosAutocomplete.isNotEmpty) {
+            final correspondente = _cubit.state.bairrosAutocomplete.firstWhere(
+              (b) => b.nomeBairro.toLowerCase() == bairroGps.toLowerCase(),
+              orElse: () => _cubit.state.bairrosAutocomplete.first,
+            );
+            _bairroId = correspondente.bairroId;
+            _cubit.selecionarBairro(correspondente);
+          }
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Endereço preenchido via localização atual!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        throw Exception(
+          'Não foi possível identificar o endereço para este local.',
+        );
+      }
     } catch (e) {
-      _enderecoController.text = "";
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao obter localização: $e')),
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.orange.shade800,
+          ),
         );
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isFetchingLocation = false;
-        });
+        setState(() => _isFetchingGps = false);
       }
     }
   }
 
-  void _abrirSelecaoCategoria() {
+  void _abrirSelecaoBairro() {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    // Rola suavemente o campo
+    // Dispara busca inicial se o campo já tiver algo ou limpa para nova busca
+    final termoInicial = _bairroController.text.trim();
+    if (termoInicial.isNotEmpty) {
+      _cubit.buscarBairros(termoInicial);
+    } else {
+      _cubit.buscarBairros('');
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (modalContext) {
+        final searchController = TextEditingController(text: termoInicial);
+        Timer? debounce;
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final mediaQuery = MediaQuery.of(context);
+            final modalHeight = mediaQuery.size.height * 0.85;
+
+            return SizedBox(
+              height: modalHeight,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: mediaQuery.viewInsets.bottom,
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Selecione o Bairro',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.darkBlue,
+                                  ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.pop(modalContext),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: AppTextField(
+                          controller: searchController,
+                          hintText: 'Digite o bairro',
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: AppColors.primary,
+                          ),
+                          onChanged: (query) {
+                            debounce?.cancel();
+                            debounce =
+                                Timer(const Duration(milliseconds: 350), () {
+                              _cubit.buscarBairros(query);
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(height: 1),
+                      Expanded(
+                        child:
+                            BlocBuilder<ZeladoriaFormCubit, ZeladoriaFormState>(
+                          bloc: _cubit,
+                          builder: (context, state) {
+                            if (state.isBuscandoBairros) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24.0),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            if (state.bairrosAutocomplete.isEmpty) {
+                              return Center(
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Text(
+                                    searchController.text.trim().isEmpty
+                                        ? 'Digite o nome do bairro acima para pesquisar.'
+                                        : 'Nenhum bairro encontrado para "${searchController.text}".',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return ListView.separated(
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: state.bairrosAutocomplete.length,
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final bairro = state.bairrosAutocomplete[index];
+                                final isSelected = _bairroId == bairro.bairroId;
+
+                                return ListTile(
+                                  title: Text(
+                                    bairro.nomeBairro,
+                                    style: TextStyle(
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  trailing: isSelected
+                                      ? const Icon(
+                                          Icons.check,
+                                          color: AppColors.primary,
+                                        )
+                                      : null,
+                                  onTap: () {
+                                    setState(() {
+                                      _bairroId = bairro.bairroId;
+                                      _bairroController.text =
+                                          bairro.nomeBairro;
+                                    });
+                                    _cubit.selecionarBairro(bairro);
+                                    Navigator.pop(modalContext);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _abrirSelecaoCategoria(List<CategoriaModel> categorias) {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     final ctx = _categoriaKey.currentContext;
     if (ctx != null && ctx.mounted) {
       Scrollable.ensureVisible(
@@ -278,7 +410,6 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       );
     }
 
-    // Aguarda o scroll e abre o modal perfeitamente
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       showModalBottomSheet(
@@ -303,13 +434,17 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                 ),
                 const Divider(height: 1),
                 Expanded(
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: _categorias.entries.map((e) {
-                      final isSelected = _categoriaId == e.key;
+                  child: ListView.builder(
+                    itemCount: categorias.length,
+                    itemBuilder: (context, index) {
+                      final item = categorias[index];
+                      final isSelected =
+                          _cubit.state.categoriaSelecionada?.categoriaId ==
+                              item.categoriaId;
+
                       return ListTile(
                         title: Text(
-                          e.value,
+                          item.nomeCategoria,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: isSelected
@@ -324,15 +459,13 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                             ? const Icon(Icons.check, color: AppColors.primary)
                             : null,
                         onTap: () {
-                          setState(() {
-                            _categoriaId = e.key;
-                            _servicoSelecionado = null;
-                            _tituloController.clear();
-                          });
+                          _cubit.selecionarCategoria(item);
+                          _categoriaController.text = item.nomeCategoria;
+                          _servicoController.clear();
                           Navigator.pop(context);
                         },
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
               ],
@@ -343,27 +476,15 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
     });
   }
 
-  Future<void> _abrirSelecaoServico() async {
+  void _abrirSelecaoServico(List<ServicoModel> servicos) {
     FocusScope.of(context).unfocus();
 
-    if (_categoriaId == null) {
+    if (_cubit.state.categoriaSelecionada == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Selecione primeiro uma categoria.')),
       );
       return;
     }
-
-    final categoriaNome = _categorias[_categoriaId];
-    final servicos = _servicosPorCategoriaId[_categoriaId] ??
-        _servicosPorCategoria[categoriaNome] ??
-        switch (categoriaNome) {
-          'Manutenção de Via pública' =>
-            _servicosPorCategoria['Pavimentação e vias'],
-          'Limpeza Urbana' => _servicosPorCategoria['Coleta de resíduos'],
-          'Mobiliário Urbano' => _servicosPorCategoria['Mobiliário de limpeza'],
-          _ => null,
-        } ??
-        [];
 
     if (servicos.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -408,13 +529,18 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                 ),
                 const Divider(height: 1),
                 Flexible(
-                  child: ListView(
+                  child: ListView.builder(
                     shrinkWrap: true,
-                    children: servicos.map((servico) {
-                      final isSelected = _servicoSelecionado == servico;
+                    itemCount: servicos.length,
+                    itemBuilder: (context, index) {
+                      final item = servicos[index];
+                      final isSelected =
+                          _cubit.state.servicoSelecionado?.servicoId ==
+                              item.servicoId;
+
                       return ListTile(
                         title: Text(
-                          servico,
+                          item.nomeServico,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: isSelected
@@ -429,14 +555,12 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                             ? const Icon(Icons.check, color: AppColors.primary)
                             : null,
                         onTap: () {
-                          setState(() {
-                            _servicoSelecionado = servico;
-                            _tituloController.text = servico;
-                          });
+                          _cubit.selecionarServico(item);
+                          _servicoController.text = item.nomeServico;
                           Navigator.pop(context);
                         },
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
               ],
@@ -487,6 +611,8 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.camera,
+      maxWidth: 1920,
+      maxHeight: 1920,
       imageQuality: 80,
     );
 
@@ -503,112 +629,90 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   Future<void> _selecionarFotosGaleria() async {
     FocusManager.instance.primaryFocus?.unfocus();
     final picker = ImagePicker();
-    final pickedFiles = await picker.pickMultiImage(imageQuality: 80);
+    final pickedFiles = await picker.pickMultiImage(
+      maxWidth: 1920,
+      maxHeight: 1920,
+      imageQuality: 80,
+    );
 
     if (pickedFiles.isNotEmpty) {
       setState(() {
         _fotos.addAll(pickedFiles);
         if (_fotos.length > 3) {
-          _fotos.removeRange(3, _fotos.length); // Limita a 3 fotos
+          _fotos.removeRange(3, _fotos.length);
         }
       });
     }
   }
 
-  Future<List<String>> _uploadFotos() async {
-    final supabase = Supabase.instance.client;
-    List<String> urls = [];
-
-    for (var foto in _fotos) {
-      final file = File(foto.path);
-      final fileExt = foto.path.split('.').last;
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_${_cpfController.text}.$fileExt';
-      final path = 'solicitacoes/$fileName';
-
-      await supabase.storage.from('zeladoria-fotos').upload(path, file);
-
-      final publicUrl =
-          supabase.storage.from('zeladoria-fotos').getPublicUrl(path);
-      urls.add(publicUrl);
-    }
-
-    return urls;
-  }
-
-  Future<void> _enviarSolicitacao() async {
+  void _enviarSolicitacao() {
     if (!_formKey.currentState!.validate()) return;
-    if (_categoriaId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecione uma categoria.')));
-      return;
-    }
-    if (_servicoSelecionado == null || _servicoSelecionado!.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Selecione um serviço.')));
+
+    final state = _cubit.state;
+
+    if (state.categoriaSelecionada == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione uma categoria.')),
+      );
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    try {
-      final urlsFotos = await _uploadFotos();
-
-      final response = await Supabase.instance.client
-          .from('solicitacoes')
-          .insert({
-            'cpf_usuario': _cpfController.text.replaceAll(
-              RegExp(r'[^0-9]'),
-              '',
-            ),
-            'telefone': _celularController.text.replaceAll(
-              RegExp(r'[^0-9]'),
-              '',
-            ),
-            'endereco': _enderecoController.text,
-            'categoria_id': _categoriaId,
-            'titulo': _servicoSelecionado ?? _tituloController.text,
-            'descricao': _descricaoController.text,
-            'fotos': urlsFotos,
-          })
-          .select('protocolo')
-          .single();
-
-      final protocolo = response['protocolo'];
-
-      if (mounted) {
-        AppSuccessModal.show(
-          context,
-          title: 'Solicitação Enviada!',
-          message:
-              'Sua solicitação foi registrada com sucesso. Anote o número do seu protocolo:',
-          highlightedText: protocolo.toString(),
-          bottomMessage: 'Aguarde o andamento da análise.',
-          onPressed: () {
-            // Abre o modal de avaliação após o fechamento do sucesso
-            AppReviewModal.show(
-              context,
-              onFinish: () {
-                Navigator.pop(context); // Volta para a ZeladoriaHomePage
-              },
-            );
-          },
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao enviar: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+    if (state.servicoSelecionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione um serviço.')),
+      );
+      return;
     }
+
+    final bairroIdFinal = _bairroId ??
+        state.bairroSelecionado?.bairroId ??
+        state.enderecoCep?.bairroId;
+
+    if (bairroIdFinal == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione o bairro na lista.'),
+        ),
+      );
+      return;
+    }
+
+    if (_fotos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Por favor, anexe pelo menos 1 foto como evidência (de 1 a 3 fotos).'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // O CEP é opcional. Se for inválido ou não pertencer a SBC, enviamos null no payload.
+    final cepLimpo = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final bool isCepValido = cepLimpo.length == 8 &&
+        state.erroCep == null &&
+        state.enderecoCep != null;
+    final String? cepFinal = isCepValido ? cepLimpo : null;
+
+    final dto = NovaSolicitacaoDto(
+      bairroId: bairroIdFinal,
+      descricaoOcorrencia: _descricaoController.text.trim(),
+      cepOcorrencia: cepFinal,
+      logradouroOcorrencia: _logradouroController.text.trim(),
+      celularMunicipe: _celularController.text.trim(),
+      numeroOcorrencia: _numeroController.text.trim(),
+      cpfMunicipe: _cpfController.text.trim(),
+      nomeMunicipe: _nomeController.text.trim(),
+      servicoId: state.servicoSelecionado!.servicoId,
+    );
+
+    final arquivosFotos = _fotos.map((f) => File(f.path)).toList();
+
+    _cubit.enviarSolicitacao(
+      solicitacao: dto,
+      fotos: arquivosFotos,
+    );
   }
 
   Widget _buildLabel(String text) {
@@ -627,249 +731,471 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppStandardPage(
-      title: 'Zeladoria',
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.opaque,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Registre um problema na cidade',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkBlue,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _buildLabel('CPF do Solicitante'),
-                CpfTextField(controller: _cpfController),
-                const SizedBox(height: 16),
-                _buildLabel('Celular (WhatsApp)'),
-                AppTextField(
-                  controller: _celularController,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [_celularFormatter],
-                  hintText: '(11) 99999-9999',
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return 'Informe o celular';
-                    }
-                    if (val.length < 14) {
-                      return 'Informe um celular válido';
-                    }
-                    return null;
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                  child: Text(
-                    'Este número será utilizado para enviar o protocolo e as atualizações de status desta solicitação pelo WhatsApp.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildLabel('Endereço do Problema'),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: AppTextField(
-                        controller: _enderecoController,
-                        hintText: 'Digite o endereço...',
-                        validator: (val) => (val == null || val.isEmpty)
-                            ? 'Informe o endereço'
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: _isFetchingLocation ? null : _obterEnderecoAtual,
-                      child: Container(
-                        height: 52,
-                        width: 52,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(16),
+    return BlocProvider.value(
+      value: _cubit,
+      child: BlocConsumer<ZeladoriaFormCubit, ZeladoriaFormState>(
+        listener: (context, state) {
+          if (state.categoriaSelecionada != null &&
+              _categoriaController.text !=
+                  state.categoriaSelecionada!.nomeCategoria) {
+            _categoriaController.text =
+                state.categoriaSelecionada!.nomeCategoria;
+          }
+          if (state.servicoSelecionado != null &&
+              _servicoController.text !=
+                  state.servicoSelecionado!.nomeServico) {
+            _servicoController.text = state.servicoSelecionado!.nomeServico;
+          }
+
+          if (state.enderecoCep != null) {
+            _logradouroController.text = state.enderecoCep!.logradouro;
+            _bairroController.text = state.enderecoCep!.nomeBairro;
+            _bairroId = state.enderecoCep!.bairroId;
+            _numeroFocusNode.requestFocus();
+          }
+
+          if (state.submissionStatus == FormSubmissionStatus.success &&
+              state.protocoloCriado != null) {
+            AppSuccessModal.show(
+              context,
+              title: 'Solicitação Enviada!',
+              message:
+                  'Sua solicitação foi registrada com sucesso. Anote o número do seu protocolo:',
+              highlightedText: state.protocoloCriado!,
+              bottomMessage: 'Aguarde o andamento da análise.',
+              onPressed: () {
+                _cubit.resetSubmissionStatus();
+                Navigator.pop(context);
+              },
+            );
+          }
+
+          if (state.submissionStatus == FormSubmissionStatus.failure &&
+              state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Erro ao enviar: ${state.errorMessage!}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isSubmitting =
+              state.submissionStatus == FormSubmissionStatus.submitting;
+          final isCepPreenchido =
+              _cepController.text.replaceAll(RegExp(r'[^0-9]'), '').length ==
+                      8 ||
+                  _logradouroController.text.isNotEmpty;
+
+          return AppStandardPage(
+            title: 'Zeladoria',
+            body: KeyboardDoneAccessory(
+              focusNodes: [
+                _cpfFocusNode,
+                _celularFocusNode,
+                _cepFocusNode,
+                _numeroFocusNode,
+              ],
+              child: GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                behavior: HitTestBehavior.opaque,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Registre um problema na cidade',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.darkBlue,
                         ),
-                        child: _isFetchingLocation
-                            ? const Padding(
-                                padding: EdgeInsets.all(14.0),
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.location_pin,
-                                color: Colors.white,
-                              ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildLabel('Categoria'),
-                AppTextField(
-                  key: _categoriaKey,
-                  readOnly: true,
-                  hintText: 'Selecione uma categoria',
-                  controller: TextEditingController(
-                    text: _categoriaId != null ? _categorias[_categoriaId] : '',
-                  ),
-                  suffixIcon:
-                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  onTap: _isLoadingCategorias ? null : _abrirSelecaoCategoria,
-                  validator: (val) =>
-                      _categoriaId == null ? 'Selecione uma categoria' : null,
-                ),
-                const SizedBox(height: 16),
-                _buildLabel('Serviço'),
-                AppTextField(
-                  key: _servicoKey,
-                  readOnly: true,
-                  hintText: _categoriaId == null
-                      ? 'Selecione a categoria primeiro'
-                      : 'Selecione o serviço',
-                  controller: TextEditingController(
-                    text: _servicoSelecionado ?? '',
-                  ),
-                  suffixIcon:
-                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
-                  onTap: _categoriaId == null ? null : _abrirSelecaoServico,
-                  validator: (val) => _servicoSelecionado == null
-                      ? 'Selecione um serviço'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                _buildLabel('Descrição detalhada'),
-                AppTextField(
-                  key: _descricaoKey,
-                  controller: _descricaoController,
-                  hintText: 'Explique o problema detalhadamente...',
-                  alignLabelWithHint: true,
-                  minLines: 3,
-                  maxLines: 6,
-                  maxLength: 500,
-                  textCapitalization: TextCapitalization.sentences,
-                  onTap: () {
-                    Future.delayed(const Duration(milliseconds: 300), () {
-                      if (!mounted) return;
-                      final ctx = _descricaoKey.currentContext;
-                      if (ctx != null && ctx.mounted) {
-                        Scrollable.ensureVisible(
-                          ctx,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          alignment: 0.2, // Rola para deixar visível
-                        );
-                      }
-                    });
-                  },
-                  validator: (val) => (val == null || val.isEmpty)
-                      ? 'Descreva o problema'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                _buildLabel('Fotos (Até 3)'),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ..._fotos.map((foto) {
-                      return Stack(
-                        clipBehavior: Clip.none,
+                      const SizedBox(height: 24),
+
+                      // Nome do Munícipe
+                      _buildLabel('Nome Completo'),
+                      AppTextField(
+                        controller: _nomeController,
+                        hintText: 'Digite seu nome completo',
+                        textCapitalization: TextCapitalization.words,
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'Informe o seu nome';
+                          }
+                          if (val.trim().length < 3) {
+                            return 'Nome muito curto';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // CPF do Solicitante
+                      _buildLabel('CPF do Solicitante'),
+                      CpfTextField(
+                        controller: _cpfController,
+                        focusNode: _cpfFocusNode,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Celular (WhatsApp)
+                      _buildLabel('Celular (WhatsApp)'),
+                      AppTextField(
+                        controller: _celularController,
+                        focusNode: _celularFocusNode,
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [_celularFormatter],
+                        hintText: '(11) 99999-9999',
+                        validator: (val) {
+                          if (val == null || val.isEmpty) {
+                            return 'Informe o celular';
+                          }
+                          if (val.length < 14) {
+                            return 'Informe um celular válido';
+                          }
+                          return null;
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                        child: Text(
+                          'Este número será utilizado para enviar o protocolo e as atualizações de status.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      _buildLabel('Endereço da Ocorrência'),
+                      const SizedBox(height: 2),
+
+                      // CEP com botão de GPS ao lado
+                      _buildLabel('CEP (Opcional)'),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.file(
-                              File(foto.path),
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
+                          Expanded(
+                            child: AppTextField(
+                              controller: _cepController,
+                              focusNode: _cepFocusNode,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [_cepFormatter],
+                              hintText: '00000-000',
+                              customErrorText: state.erroCep,
+                              suffixIcon: state.isBuscandoCep
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(12.0),
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    )
+                                  : InkWell(
+                                      onTap: _buscarCepManual,
+                                      child: const Icon(
+                                        Icons.search,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
                             ),
                           ),
-                          Positioned(
-                            right: -8,
-                            top: -8,
-                            child: InkWell(
-                              onTap: () => setState(() => _fotos.remove(foto)),
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: _isFetchingGps ? null : _obterEnderecoPorGps,
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              height: 52,
+                              width: 52,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
+                              child: _isFetchingGps
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(14.0),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.location_on_sharp,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
                             ),
                           ),
                         ],
-                      );
-                    }),
-                    if (_fotos.length < 3)
-                      InkWell(
-                        onTap: _abrirOpcoesDeFoto,
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.grey.shade400,
-                              style: BorderStyle.solid,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Bairro Dropdown com Autocomplete
+                      _buildLabel('Bairro'),
+                      AppTextField(
+                        key: _bairroKey,
+                        controller: _bairroController,
+                        readOnly: true,
+                        hintText: 'Selecione o bairro',
+                        suffixIcon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.grey,
+                        ),
+                        onTap: _abrirSelecaoBairro,
+                        validator: (val) =>
+                            (val == null || val.trim().isEmpty)
+                                ? 'Selecione o bairro'
+                                : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Logradouro
+                      _buildLabel('Logradouro (Rua / Avenida)'),
+                      AppTextField(
+                        controller: _logradouroController,
+                        hintText: 'Ex: Rua das Flores',
+                        validator: (val) => (val == null || val.trim().isEmpty)
+                            ? 'Informe o logradouro'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Número
+                      _buildLabel('Número'),
+                      AppTextField(
+                        focusNode: _numeroFocusNode,
+                        controller: _numeroController,
+                        keyboardType: TextInputType.text,
+                        enabled: isCepPreenchido,
+                        hintText: isCepPreenchido ? 'Ex: 1200' : 'Ex: 1200',
+                        validator: (val) {
+                          if (isCepPreenchido &&
+                              (val == null || val.trim().isEmpty)) {
+                            return 'Informe o nº';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Categoria
+                      _buildLabel('Categoria'),
+                      AppTextField(
+                        key: _categoriaKey,
+                        controller: _categoriaController,
+                        readOnly: true,
+                        hintText: state.isLoadingCategorias
+                            ? 'Carregando categorias...'
+                            : 'Selecione uma categoria',
+                        suffixIcon: state.isLoadingCategorias
+                            ? const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.grey,
+                              ),
+                        onTap: state.isLoadingCategorias
+                            ? null
+                            : () => _abrirSelecaoCategoria(state.categorias),
+                        validator: (val) => state.categoriaSelecionada == null
+                            ? 'Selecione uma categoria'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Serviço
+                      _buildLabel('Serviço'),
+                      AppTextField(
+                        key: _servicoKey,
+                        controller: _servicoController,
+                        readOnly: true,
+                        hintText: state.categoriaSelecionada == null
+                            ? 'Selecione a categoria primeiro'
+                            : (state.isLoadingServicos
+                                ? 'Carregando serviços...'
+                                : 'Selecione o serviço'),
+                        suffixIcon: state.isLoadingServicos
+                            ? const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : const Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.grey,
+                              ),
+                        onTap: (state.categoriaSelecionada == null ||
+                                state.isLoadingServicos)
+                            ? null
+                            : () => _abrirSelecaoServico(state.servicos),
+                        validator: (val) => state.servicoSelecionado == null
+                            ? 'Selecione um serviço'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Descrição
+                      _buildLabel('Descrição detalhada'),
+                      AppTextField(
+                        key: _descricaoKey,
+                        controller: _descricaoController,
+                        hintText: 'Explique o problema detalhadamente...',
+                        alignLabelWithHint: true,
+                        minLines: 3,
+                        maxLines: 6,
+                        maxLength: 500,
+                        textCapitalization: TextCapitalization.sentences,
+                        onTap: () {
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (!mounted) return;
+                            final ctx = _descricaoKey.currentContext;
+                            if (ctx != null && ctx.mounted) {
+                              Scrollable.ensureVisible(
+                                ctx,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                alignment: 0.2,
+                              );
+                            }
+                          });
+                        },
+                        validator: (val) => (val == null || val.trim().isEmpty)
+                            ? 'Descreva o problema'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Fotos (1 a 3 fotos)
+                      _buildLabel('Fotos (até 3)'),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ..._fotos.map((foto) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    File(foto.path),
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  right: -8,
+                                  top: -8,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        setState(() => _fotos.remove(foto)),
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                          if (_fotos.length < 3)
+                            InkWell(
+                              onTap: _abrirOpcoesDeFoto,
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade200,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.grey.shade400,
+                                    style: BorderStyle.solid,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.add_a_photo,
+                                  color: Colors.grey,
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Botão de Envio
+                      SizedBox(
+                        height: 54,
+                        child: ElevatedButton(
+                          onPressed: isSubmitting ? null : _enviarSolicitacao,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Icon(
-                            Icons.add_a_photo,
-                            color: Colors.grey,
-                            size: 32,
-                          ),
+                          child: isSubmitting
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Text(
+                                  'Enviar Solicitação',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  height: 54,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _enviarSolicitacao,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Enviar Solicitação',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      const SizedBox(height: 48),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 48),
-              ],
+              ),
             ),
           ),
-        ),
+        );
+        },
       ),
     );
   }

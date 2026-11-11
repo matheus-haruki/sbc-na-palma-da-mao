@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:palma_da_mao/core/components/app_standard_page.dart';
-import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:palma_da_mao/core/components/app_empty_state.dart';
+import 'package:palma_da_mao/core/components/app_primary_button.dart';
 import 'package:palma_da_mao/core/components/app_shimmer_list.dart';
+import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
+import 'package:palma_da_mao/core/components/keyboard_done_accessory.dart';
+import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/utils/cpf_validator.dart';
+import '../models/solicitacao_resumo_model.dart';
+import '../presentational/controllers/zeladoria_consulta_cubit.dart';
+import '../presentational/controllers/zeladoria_consulta_state.dart';
 
 class ZeladoriaAcompanharPage extends StatefulWidget {
   const ZeladoriaAcompanharPage({super.key});
@@ -18,297 +24,308 @@ class ZeladoriaAcompanharPage extends StatefulWidget {
 
 class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
   final _cpfController = TextEditingController();
+  final _cpfFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
 
-  bool _isLoading = false;
-  bool _foiBuscado = false;
-  List<dynamic> _solicitacoes = [];
+  late final ZeladoriaConsultaCubit _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = Modular.get<ZeladoriaConsultaCubit>();
+  }
 
   @override
   void dispose() {
+    _cpfFocusNode.dispose();
     _cpfController.dispose();
     super.dispose();
   }
 
-  Future<void> _buscarSolicitacoes() async {
-    if (!_formKey.currentState!.validate()) return;
+  void _buscarSolicitacoes() {
+    _cpfFocusNode.unfocus();
     FocusScope.of(context).unfocus();
-
-    setState(() {
-      _isLoading = true;
-      _foiBuscado = true;
-      _solicitacoes = [];
-    });
-
-    try {
-      final cpfLimpo = _cpfController.text.replaceAll(RegExp(r'[^0-9]'), '');
-
-      final response = await Supabase.instance.client
-          .from('solicitacoes')
-          .select('*, categorias(nome)')
-          .eq('cpf_usuario', cpfLimpo)
-          .order('criado_em', ascending: false);
-
-      if (mounted) {
-        setState(() {
-          _solicitacoes = response;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao buscar: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    if (!_formKey.currentState!.validate()) return;
+    _cubit.consultarPorCpf(_cpfController.text);
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Em análise':
+    switch (status.trim().toLowerCase()) {
+      case 'em análise':
+      case 'em analise':
         return Colors.orange;
-      case 'Encaminhada':
+      case 'encaminhada':
         return Colors.blue;
-      case 'Cancelada':
+      case 'cancelada':
         return Colors.red;
-      case 'Em Execução':
+      case 'em execução':
+      case 'em execucao':
         return Colors.purple;
-      case 'Concluída':
+      case 'concluída':
+      case 'concluida':
         return Colors.green;
       default:
         return Colors.grey;
     }
   }
 
-  String _formatarData(String dataIso) {
-    try {
-      final data = DateTime.parse(dataIso);
-      return DateFormat('dd/MM/yyyy HH:mm').format(data);
-    } catch (_) {
-      return dataIso;
-    }
+  String _formatarData(DateTime data) {
+    return DateFormat('dd/MM/yyyy HH:mm').format(data);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AppStandardPage(
-      title: 'Acompanhar Solicitações',
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Consulte suas solicitações',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkBlue,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4, bottom: 8),
-                    child: Text(
-                      'Informe seu CPF',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: AppColors.darkBlue,
-                      ),
-                    ),
-                  ),
-                  CpfTextField(controller: _cpfController),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 54,
-                    child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _buscarSolicitacoes,
-                      icon: _isLoading
-                          ? const SizedBox()
-                          : const Icon(Icons.search),
-                      label: Text(
-                        _isLoading ? 'Buscando...' : 'Buscar',
-                        style: const TextStyle(
-                          fontSize: 16,
+    return BlocProvider.value(
+      value: _cubit,
+      child: AppStandardPage(
+        title: 'Acompanhar Solicitações',
+        body: KeyboardDoneAccessory(
+          focusNodes: [_cpfFocusNode],
+          child: GestureDetector(
+            onTap: () {
+              _cpfFocusNode.unfocus();
+              FocusScope.of(context).unfocus();
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Consulte suas solicitações',
+                        style: TextStyle(
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.darkBlue,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4, bottom: 8),
+                        child: Text(
+                          'Informe seu CPF',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: AppColors.darkBlue,
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: _isLoading
-                ? const AppShimmerList(
-                    padding: EdgeInsets.all(16),
-                  )
-                : (!_foiBuscado)
-                    ? const SizedBox.shrink()
-                    : _solicitacoes.isEmpty
-                        ? const AppEmptyState(message: 'Nenhuma solicitação encontrada.')
-                        : ListView.separated(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: _solicitacoes.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final item = _solicitacoes[index];
-                              final status = item['status'] ?? 'Desconhecido';
-                              final color = _getStatusColor(status);
-                              final categoriaNome =
-                                  item['categorias']?['nome'] ?? 'Outros';
+                      CpfTextField(
+                        controller: _cpfController,
+                        focusNode: _cpfFocusNode,
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'Informe seu CPF';
+                          }
+                          if (!CpfValidator.isValid(val)) {
+                            return 'Digite um CPF válido';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      BlocBuilder<ZeladoriaConsultaCubit,
+                          ZeladoriaConsultaState>(
+                        builder: (context, state) {
+                          final isLoading = state is ZeladoriaConsultaLoading;
 
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border:
-                                      Border.all(color: Colors.grey.shade200),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.03),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(16),
-                                    onTap: () {
-                                      Modular.to.pushNamed(
-                                        '/zeladoria/detalhes',
-                                        arguments: item,
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(16.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 4,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: color.withValues(alpha: 0.1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                    12,
-                                                  ),
-                                                  border: Border.all(
-                                                    color:
-                                                        color.withValues(alpha: 0.3),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  status.toUpperCase(),
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: color,
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                _formatarData(
-                                                    item['criado_em']),
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 12),
-                                          Text(
-                                            item['titulo'] ?? '',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.darkBlue,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Categoria: $categoriaNome',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey.shade700,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            item['descricao'] ?? '',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey.shade800,
-                                            ),
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 12),
-                                          const Divider(),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                'Protocolo:',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ),
-                                              Text(
-                                                item['protocolo'] ?? '-',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Courier',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                          return ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: _cpfController,
+                            builder: (context, value, _) {
+                              final isValidCpf =
+                                  CpfValidator.isValid(value.text);
+
+                              return AppPrimaryButton(
+                                text: 'Buscar',
+                                isLoading: isLoading,
+                                onPressed: isValidCpf ? _buscarSolicitacoes : null,
                               );
                             },
-                          ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Expanded(
+              child:
+                  BlocConsumer<ZeladoriaConsultaCubit, ZeladoriaConsultaState>(
+                listener: (context, state) {
+                  if (state is ZeladoriaConsultaError) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state is ZeladoriaConsultaLoading) {
+                    return const AppShimmerList(padding: EdgeInsets.all(16));
+                  }
+
+                  if (state is ZeladoriaConsultaInitial) {
+                    return const SizedBox.shrink();
+                  }
+
+                  if (state is ZeladoriaConsultaEmpty) {
+                    return const AppEmptyState(
+                      message: 'Nenhuma solicitação encontrada para este CPF.',
+                    );
+                  }
+
+                  if (state is ZeladoriaConsultaSuccess) {
+                    return ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.solicitacoes.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final item = state.solicitacoes[index];
+                        final status = item.rotuloStatus;
+                        final color = _getStatusColor(status);
+
+                        return _buildCardSolicitacao(item, status, color);
+                      },
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
+);
+}
+
+  Widget _buildCardSolicitacao(
+    SolicitacaoResumoModel item,
+    String status,
+    Color color,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () async {
+            _cpfFocusNode.unfocus();
+            FocusScope.of(context).unfocus();
+            FocusManager.instance.primaryFocus?.unfocus();
+
+            await Modular.to.pushNamed(
+              '/zeladoria/detalhes',
+              arguments: {
+                'protocolo': item.protocolo,
+                'cpf': _cpfController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+                'resumo': item,
+              },
+            );
+
+            if (mounted) {
+              _cpfFocusNode.unfocus();
+              FocusScope.of(context).unfocus();
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: color.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        status.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      _formatarData(item.incluidoEm),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  item.nomeServico,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkBlue,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Protocolo:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Text(
+                      item.protocolo,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Courier',
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/components/app_primary_button.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 import 'package:palma_da_mao/modules/debitos_transito/presentational/controllers/transito_cubit.dart';
@@ -72,31 +73,16 @@ class _TransitoPageState extends State<TransitoPage> {
                   controller: _cpfController,
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
-                      disabledForegroundColor: Colors.grey.shade500,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: _isButtonEnabled
-                        ? () {
-                            FocusScope.of(context).unfocus();
-                            final unmaskedText = _cpfController.text
-                                .replaceAll(RegExp(r'[^0-9]'), '');
-                            _cubit.buscarDebitos(unmaskedText);
-                          }
-                        : null,
-                    child: const Text(
-                      'Buscar Débitos',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
+                AppPrimaryButton(
+                  text: 'Buscar Débitos',
+                  onPressed: _isButtonEnabled
+                      ? () {
+                          FocusScope.of(context).unfocus();
+                          final unmaskedText = _cpfController.text
+                              .replaceAll(RegExp(r'[^0-9]'), '');
+                          _cubit.buscarDebitos(unmaskedText);
+                        }
+                      : null,
                 ),
               ],
             ),

@@ -49,6 +49,7 @@ class AppSuccessModal extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       backgroundColor: AppColors.surface,
       title: Column(
@@ -85,7 +86,7 @@ class AppSuccessModal extends StatelessWidget {
           if (highlightedText != null) ...[
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.backgroundBlue,
                 borderRadius: BorderRadius.circular(8),
@@ -94,16 +95,22 @@ class AppSuccessModal extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    highlightedText!,
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.textLabel,
-                      letterSpacing: 1.2,
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        highlightedText!,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: AppColors.textLabel,
+                          letterSpacing: 0.8,
+                        ),
+                        maxLines: 1,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   InkWell(
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: highlightedText!));
@@ -115,7 +122,7 @@ class AppSuccessModal extends StatelessWidget {
                         ),
                       );
                     },
-                    child: const Icon(Icons.copy, color: AppColors.darkBlue, size: 22),
+                    child: const Icon(Icons.copy, color: AppColors.darkBlue, size: 20),
                   ),
                 ],
               ),
