@@ -6,7 +6,6 @@ import 'package:palma_da_mao/modules/zeladoria/models/consulta_solicitacoes_resp
 import 'package:palma_da_mao/modules/zeladoria/models/endereco_cep_model.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/nova_solicitacao_dto.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/servico_model.dart';
-import 'package:palma_da_mao/modules/zeladoria/models/solicitacao_resumo_model.dart';
 
 void main() {
   group('UuidGenerator', () {

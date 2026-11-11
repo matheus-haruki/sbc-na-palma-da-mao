@@ -20,7 +20,9 @@ class IptuPage extends StatefulWidget {
 }
 
 class _IptuPageState extends State<IptuPage> {
+  final _formKey = GlobalKey<FormState>();
   final _cpfController = TextEditingController();
+  final _cpfFocusNode = FocusNode();
   late final IptuCubit _cubit;
   bool _isButtonEnabled = false;
 
@@ -45,6 +47,7 @@ class _IptuPageState extends State<IptuPage> {
   void dispose() {
     _cpfController.removeListener(_onCpfChanged);
     _cpfController.dispose();
+    _cpfFocusNode.dispose();
     super.dispose();
   }
 
@@ -85,40 +88,48 @@ class _IptuPageState extends State<IptuPage> {
 
     return AppStandardPage(
       title: 'Consulta de Débitos - IPTU',
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Informe o CPF do proprietário do imóvel:',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.secondary,
-                  ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Informe o CPF do proprietário do imóvel:',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    CpfTextField(
+                      controller: _cpfController,
+                      focusNode: _cpfFocusNode,
+                    ),
+                    const SizedBox(height: 16),
+                    AppPrimaryButton(
+                      text: 'Buscar Débitos',
+                      onPressed: _isButtonEnabled
+                          ? () {
+                              FocusScope.of(context).unfocus();
+                              if (!_formKey.currentState!.validate()) return;
+                              final unmaskedText = _cpfController.text
+                                  .replaceAll(RegExp(r'[^0-9]'), '');
+                              _cubit.buscarDebitos(unmaskedText);
+                            }
+                          : null,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                CpfTextField(
-                  controller: _cpfController,
-                ),
-                const SizedBox(height: 16),
-                AppPrimaryButton(
-                  text: 'Buscar Débitos',
-                  onPressed: _isButtonEnabled
-                      ? () {
-                          FocusScope.of(context).unfocus();
-                          final unmaskedText = _cpfController.text
-                              .replaceAll(RegExp(r'[^0-9]'), '');
-                          _cubit.buscarDebitos(unmaskedText);
-                        }
-                      : null,
-                ),
-              ],
+              ),
             ),
-          ),
-          Expanded(
+            Expanded(
             child: BlocBuilder<IptuCubit, IptuState>(
               bloc: _cubit,
               builder: (context, state) {
@@ -284,6 +295,7 @@ class _IptuPageState extends State<IptuPage> {
             ),
           ],
         ),
+      ),
     );
   }
 }

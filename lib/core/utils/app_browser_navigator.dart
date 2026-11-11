@@ -30,5 +30,3 @@ class AppBrowserNavigator {
     }
   }
 }
-
-//TODO: Autorizar abertura de navegador externo para serviços web para o ios no info.plist

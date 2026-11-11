@@ -184,8 +184,9 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                                       setStateModal(() => isCopied = true);
                                       await Future.delayed(
                                           const Duration(seconds: 2));
-                                      if (context.mounted)
+                                      if (context.mounted) {
                                         setStateModal(() => isCopied = false);
+                                      }
                                     },
                               icon: Icon(
                                   isCopied ? Icons.check_circle : Icons.copy),
@@ -213,13 +214,17 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                             child: OutlinedButton.icon(
                               onPressed: () {
                                 if (guiaState.pdfBytes != null) {
-                                  Share.shareXFiles([
-                                    XFile.fromData(
-                                      guiaState.pdfBytes!,
-                                      name: 'Transito_SBC_Lancamento.pdf',
-                                      mimeType: 'application/pdf',
+                                  SharePlus.instance.share(
+                                    ShareParams(
+                                      files: [
+                                        XFile.fromData(
+                                          guiaState.pdfBytes!,
+                                          name: 'Transito_SBC_Lancamento.pdf',
+                                          mimeType: 'application/pdf',
+                                        ),
+                                      ],
                                     ),
-                                  ]);
+                                  );
                                 }
                               },
                               icon: const Icon(Icons.picture_as_pdf),

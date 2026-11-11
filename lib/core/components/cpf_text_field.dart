@@ -8,6 +8,7 @@ class CpfTextField extends StatefulWidget {
   final Function(String)? onChanged;
   final FormFieldValidator<String>? validator;
   final FocusNode? focusNode;
+  final AutovalidateMode autovalidateMode;
 
   const CpfTextField({
     super.key,
@@ -15,6 +16,7 @@ class CpfTextField extends StatefulWidget {
     this.onChanged,
     this.validator,
     this.focusNode,
+    this.autovalidateMode = AutovalidateMode.disabled,
   });
 
   @override
@@ -30,6 +32,7 @@ class _CpfTextFieldState extends State<CpfTextField> {
     _cpfMaskFormatter = MaskTextInputFormatter(
       mask: '###.###.###-##',
       filter: {"#": RegExp(r'[0-9]')},
+      initialText: widget.controller.text,
     );
   }
 
@@ -41,6 +44,7 @@ class _CpfTextFieldState extends State<CpfTextField> {
       keyboardType: TextInputType.number,
       inputFormatters: [_cpfMaskFormatter],
       hintText: '000.000.000-00',
+      autovalidateMode: widget.autovalidateMode,
       onChanged: (val) {
         if (widget.onChanged != null) {
           widget.onChanged!(_cpfMaskFormatter.getUnmaskedText());
@@ -48,11 +52,12 @@ class _CpfTextFieldState extends State<CpfTextField> {
       },
       validator: widget.validator ??
           (val) {
-            final unmasked = _cpfMaskFormatter.getUnmaskedText();
+            final text = val ?? widget.controller.text;
+            final unmasked = text.replaceAll(RegExp(r'[^0-9]'), '');
             if (unmasked.isEmpty) {
               return 'Informe o CPF';
             }
-            if (!CpfValidator.isValid(unmasked)) {
+            if (unmasked.length < 11 || !CpfValidator.isValid(unmasked)) {
               return 'Digite um CPF válido';
             }
             return null;

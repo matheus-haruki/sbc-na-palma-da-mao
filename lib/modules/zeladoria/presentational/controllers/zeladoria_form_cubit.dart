@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cpf_validator.dart';
 import '../../models/bairro_model.dart';
 import '../../models/categoria_model.dart';
 import '../../models/nova_solicitacao_dto.dart';
@@ -153,6 +154,17 @@ class ZeladoriaFormCubit extends Cubit<ZeladoriaFormState> {
     required NovaSolicitacaoDto solicitacao,
     required List<File> fotos,
   }) async {
+    final cpfLimpo = solicitacao.cpfMunicipe.replaceAll(RegExp(r'[^0-9]'), '');
+    if (!CpfValidator.isValid(cpfLimpo)) {
+      emit(
+        state.copyWith(
+          submissionStatus: FormSubmissionStatus.failure,
+          errorMessage: () => 'CPF do solicitante inválido.',
+        ),
+      );
+      return;
+    }
+
     emit(
       state.copyWith(
         submissionStatus: FormSubmissionStatus.submitting,

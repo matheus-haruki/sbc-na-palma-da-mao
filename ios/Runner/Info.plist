@@ -28,6 +28,7 @@
 	<array>
 		<string>http</string>
 		<string>https</string>
+		<string>tel</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

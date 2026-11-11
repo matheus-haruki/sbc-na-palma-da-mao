@@ -28,6 +28,7 @@ dependencies:
   shimmer: ^4.0.0
   intl: ^0.20.3
   pdf: ^3.13.0
+  barcode: ^2.2.9
   share_plus: ^13.3.0
   path_provider: ^2.1.6
   printing: ^5.15.0

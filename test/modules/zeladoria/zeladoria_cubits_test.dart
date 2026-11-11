@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:palma_da_mao/modules/zeladoria/models/bairro_model.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/categoria_model.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/consulta_solicitacoes_response.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/endereco_cep_model.dart';
@@ -146,7 +147,7 @@ void main() {
       expect(cubit.state.erroCep, isNull);
     });
 
-    test('setErroCep deve definir mensagem de erro no estado', () {
+    test('setErroCep deve definir erroCep no estado', () {
       final cubit = ZeladoriaFormCubit(fakeZeladoriaRepo, fakeEnderecoRepo);
       expect(cubit.state.erroCep, isNull);
 

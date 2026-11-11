@@ -1,5 +1,3 @@
-//TODO: IMPLEMENTAR ESSE CPF_VALIDATOR EM TODOS OS LUGARES DO APP.
-
 class CpfValidator {
   const CpfValidator._();
 

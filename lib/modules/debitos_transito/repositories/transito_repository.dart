@@ -7,22 +7,26 @@ class TransitoRepository {
 
   // ===========================================================================
   // TODO: [IMPORTANTE - ANTES DE SUBIR PARA PRODUÇÃO]
-  // Lembrar de alterar esta flag para `false` para apontar novamente para os
-  // endpoints oficiais de produção da Prefeitura de São Bernardo do Campo!
+  //       Alterar a variável useHomolog para false para que a aplicação utilize o ambiente de produção e Vice e Versa!! atualmente está configurado para produção.
   // ===========================================================================
-  static const bool useHomolog = true;
+  static const bool useHomolog = false;
 
   // Base URLs
-  static const String _prodBaseUrl = 'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos';
-  static const String _hmgBaseUrl = 'http://dti-pwebhmg-02:8080/consulta-de-debitos';
+  static const String _prodBaseUrl =
+      'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos';
+  static const String _hmgBaseUrl =
+      'http://dti-pwebhmg-02:8080/consulta-de-debitos';
 
   static String get baseUrl => useHomolog ? _hmgBaseUrl : _prodBaseUrl;
 
   // Códigos de Sistema (Identificação da Aplicação)
-  static const String _prodCodigoSistema = '8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e';
-  static const String _hmgCodigoSistema = '9a3b5f84-db2e-4c1e-98f7-4a6e9b214c08';
+  static const String _prodCodigoSistema =
+      '8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e';
+  static const String _hmgCodigoSistema =
+      '9a3b5f84-db2e-4c1e-98f7-4a6e9b214c08';
 
-  static String get codigoSistema => useHomolog ? _hmgCodigoSistema : _prodCodigoSistema;
+  static String get codigoSistema =>
+      useHomolog ? _hmgCodigoSistema : _prodCodigoSistema;
 
   TransitoRepository(this._dio);
 
@@ -54,15 +58,17 @@ class TransitoRepository {
           // Filtra multas de trânsito (ou aceita todos caso o endpoint de homolog já traga filtrado)
           return list
               .map((e) => DebitoModel.fromJson(e))
-              .where((debito) => debito.tipo == null || debito.tipo == 'M.TRANS')
+              .where(
+                  (debito) => debito.tipo == null || debito.tipo == 'M.TRANS')
               .toList();
         }
       }
-      
+
       return [];
     } on DioException catch (e) {
       if (e.response?.statusCode == 500) {
-        throw Exception('Servidor indisponível (Erro 500). Tente novamente mais tarde.');
+        throw Exception(
+            'Servidor indisponível (Erro 500). Tente novamente mais tarde.');
       }
       throw Exception('Falha na comunicação com o servidor: ${e.message}');
     } catch (e) {
@@ -85,11 +91,12 @@ class TransitoRepository {
       if (response.data != null && response.data is Map) {
         return response.data as Map<String, dynamic>;
       }
-      
+
       throw Exception('Resposta vazia');
     } on DioException catch (e) {
       if (e.response?.statusCode == 500) {
-        throw Exception('Servidor indisponível (Erro 500). Tente novamente mais tarde.');
+        throw Exception(
+            'Servidor indisponível (Erro 500). Tente novamente mais tarde.');
       }
       throw Exception('Falha na comunicação com o servidor: ${e.message}');
     } catch (e) {
@@ -136,7 +143,7 @@ class TransitoRepository {
   }
 
   Future<GuiaPagamentoModel> gerarBoletoParcela(
-    String lancamento, 
+    String lancamento,
     int parcela, {
     Map<String, dynamic>? dadosComplementares,
     String? parcelasDescricao,
@@ -176,4 +183,3 @@ class TransitoRepository {
     }
   }
 }
-

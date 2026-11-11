@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -17,25 +18,47 @@ class PdfGuiaParam {
 /// Gera a representação em PDF oficial do Documento de Arrecadação Municipal (DAM)
 /// da Prefeitura de São Bernardo do Campo (IPTU, Multas de Trânsito, etc.).
 ///
-/// Executado em um Isolate separado via `compute` para manter a UI 100% fluida.
+/// Executado em um Isolate separado via `compute` para manter a UI 100% fluida,
+/// ou diretamente caso esteja em ambiente de testes automatizados ou Web.
 Future<Uint8List> gerarPdfGuiaPagamento(
   GuiaPagamentoModel guia, {
   Uint8List? brasaoBytes,
+  bool useIsolate = true,
 }) async {
   Uint8List? imageBytes = brasaoBytes;
 
-  if (imageBytes == null) {
+  final bool isRunningInTest =
+      !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
+
+  if (imageBytes == null && !isRunningInTest) {
     try {
       final ByteData data = await rootBundle
           .load('assets/image/brasao.png')
-          .catchError((_) => rootBundle.load('assets/image/brasao.jpg'));
+          .timeout(const Duration(seconds: 1));
       imageBytes = data.buffer.asUint8List();
-    } catch (e) {
-      debugPrint('Aviso ao carregar brasão de SBC: $e');
+    } catch (_) {
+      try {
+        final ByteData data = await rootBundle
+            .load('assets/image/brasao.jpg')
+            .timeout(const Duration(seconds: 1));
+        imageBytes = data.buffer.asUint8List();
+      } catch (e) {
+        debugPrint('Aviso ao carregar brasão de SBC: $e');
+      }
     }
   }
 
-  return await compute(_buildPdf, PdfGuiaParam(guia: guia, brasaoBytes: imageBytes));
+  final param = PdfGuiaParam(guia: guia, brasaoBytes: imageBytes);
+
+  if (!useIsolate || kIsWeb || isRunningInTest) {
+    return await _buildPdf(param);
+  }
+
+  try {
+    return await compute(_buildPdf, param);
+  } catch (_) {
+    return await _buildPdf(param);
+  }
 }
 
 // Função Top-level para execução no Isolate

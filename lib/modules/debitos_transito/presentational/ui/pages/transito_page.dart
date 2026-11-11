@@ -19,7 +19,9 @@ class TransitoPage extends StatefulWidget {
 }
 
 class _TransitoPageState extends State<TransitoPage> {
+  final _formKey = GlobalKey<FormState>();
   final _cpfController = TextEditingController();
+  final _cpfFocusNode = FocusNode();
   late final TransitoCubit _cubit;
   bool _isButtonEnabled = false;
 
@@ -44,6 +46,7 @@ class _TransitoPageState extends State<TransitoPage> {
   void dispose() {
     _cpfController.removeListener(_onCpfChanged);
     _cpfController.dispose();
+    _cpfFocusNode.dispose();
     super.dispose();
   }
 
@@ -54,40 +57,48 @@ class _TransitoPageState extends State<TransitoPage> {
 
     return AppStandardPage(
       title: 'Consulta de Multas de Trânsito',
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Informe o CPF:',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.secondary,
-                  ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Informe o CPF:',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    CpfTextField(
+                      controller: _cpfController,
+                      focusNode: _cpfFocusNode,
+                    ),
+                    const SizedBox(height: 16),
+                    AppPrimaryButton(
+                      text: 'Buscar Débitos',
+                      onPressed: _isButtonEnabled
+                          ? () {
+                              FocusScope.of(context).unfocus();
+                              if (!_formKey.currentState!.validate()) return;
+                              final unmaskedText = _cpfController.text
+                                  .replaceAll(RegExp(r'[^0-9]'), '');
+                              _cubit.buscarDebitos(unmaskedText);
+                            }
+                          : null,
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                CpfTextField(
-                  controller: _cpfController,
-                ),
-                const SizedBox(height: 16),
-                AppPrimaryButton(
-                  text: 'Buscar Débitos',
-                  onPressed: _isButtonEnabled
-                      ? () {
-                          FocusScope.of(context).unfocus();
-                          final unmaskedText = _cpfController.text
-                              .replaceAll(RegExp(r'[^0-9]'), '');
-                          _cubit.buscarDebitos(unmaskedText);
-                        }
-                      : null,
-                ),
-              ],
+              ),
             ),
-          ),
-          Expanded(
+            Expanded(
             child: BlocBuilder<TransitoCubit, TransitoState>(
               bloc: _cubit,
               builder: (context, state) {
@@ -262,6 +273,7 @@ class _TransitoPageState extends State<TransitoPage> {
             ),
           ],
         ),
+      ),
     );
   }
 }

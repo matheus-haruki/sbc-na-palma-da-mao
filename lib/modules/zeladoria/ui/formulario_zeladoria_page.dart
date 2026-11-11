@@ -13,7 +13,9 @@ import 'package:palma_da_mao/core/components/app_text_field.dart';
 import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 import 'package:palma_da_mao/core/components/keyboard_done_accessory.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
+import 'package:palma_da_mao/core/utils/cpf_validator.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/categoria_model.dart';
+import 'package:palma_da_mao/modules/zeladoria/models/endereco_cep_model.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/nova_solicitacao_dto.dart';
 import 'package:palma_da_mao/modules/zeladoria/models/servico_model.dart';
 import 'package:palma_da_mao/modules/zeladoria/presentational/controllers/zeladoria_form_cubit.dart';
@@ -42,6 +44,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   final _servicoController = TextEditingController();
   int? _bairroId;
   String? _ultimoCepBuscado;
+  EnderecoCepModel? _ultimoEnderecoCepPreenchido;
   bool _isFetchingGps = false;
 
   final _descricaoController = TextEditingController();
@@ -164,6 +167,12 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
 
+        if (!_isLocalizacaoSaoBernardoDoCampo(place)) {
+          throw Exception(
+            'Localização fora de São Bernardo do Campo. O serviço de zeladoria é exclusivo para áreas dentro do município.',
+          );
+        }
+
         // 1. CEP: Se identificou, preenche e busca dados oficiais na prefeitura
         final rawPostalCode =
             place.postalCode?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
@@ -200,16 +209,6 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
             _cubit.selecionarBairro(correspondente);
           }
         }
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Endereço preenchido via localização atual!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
       } else {
         throw Exception(
           'Não foi possível identificar o endereço para este local.',
@@ -229,6 +228,48 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
         setState(() => _isFetchingGps = false);
       }
     }
+  }
+
+  bool _isLocalizacaoSaoBernardoDoCampo(Placemark place) {
+    // 1. Validação por prefixo de CEP de São Bernardo do Campo (09600-000 a 09899-999)
+    final rawPostalCode =
+        place.postalCode?.replaceAll(RegExp(r'[^0-9]'), '') ?? '';
+    if (rawPostalCode.length >= 3) {
+      final prefix = rawPostalCode.substring(0, 3);
+      if (prefix == '096' || prefix == '097' || prefix == '098') {
+        return true;
+      }
+    }
+
+    // 2. Validação por nome de município/área
+    final candidatos = [
+      place.subAdministrativeArea,
+      place.locality,
+      place.administrativeArea,
+    ];
+
+    for (final candidato in candidatos) {
+      if (candidato == null || candidato.trim().isEmpty) continue;
+      final normalizado = _removerAcentos(candidato.toLowerCase());
+      if (normalizado.contains('sao bernardo do campo') ||
+          normalizado.contains('sao bernardo') ||
+          normalizado == 'sbc') {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  String _removerAcentos(String texto) {
+    const comAcento =
+        'ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÌÍÎÏìíîïÙÚÛÜùúûüÝýÿÑñÇç';
+    const semAcento =
+        'AAAAAAaaaaaaOOOOOOooooooEEEEeeeeIIIIiiiiUUUUuuuuYyyNnCc';
+    for (int i = 0; i < comAcento.length; i++) {
+      texto = texto.replaceAll(comAcento[i], semAcento[i]);
+    }
+    return texto;
   }
 
   void _abrirSelecaoBairro() {
@@ -372,6 +413,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                                         )
                                       : null,
                                   onTap: () {
+                                    FocusScope.of(context).unfocus();
                                     setState(() {
                                       _bairroId = bairro.bairroId;
                                       _bairroController.text =
@@ -459,6 +501,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                             ? const Icon(Icons.check, color: AppColors.primary)
                             : null,
                         onTap: () {
+                          FocusScope.of(context).unfocus();
                           _cubit.selecionarCategoria(item);
                           _categoriaController.text = item.nomeCategoria;
                           _servicoController.clear();
@@ -555,6 +598,7 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                             ? const Icon(Icons.check, color: AppColors.primary)
                             : null,
                         onTap: () {
+                          FocusScope.of(context).unfocus();
                           _cubit.selecionarServico(item);
                           _servicoController.text = item.nomeServico;
                           Navigator.pop(context);
@@ -646,7 +690,20 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
   }
 
   void _enviarSolicitacao() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      if (_descricaoController.text.trim().length <= 10) {
+        final ctx = _descricaoKey.currentContext;
+        if (ctx != null && ctx.mounted) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: 0.2,
+          );
+        }
+      }
+      return;
+    }
 
     final state = _cubit.state;
 
@@ -664,6 +721,16 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       return;
     }
 
+    if (_descricaoController.text.trim().length <= 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('A descrição deve ter mais de 10 caracteres.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     final bairroIdFinal = _bairroId ??
         state.bairroSelecionado?.bairroId ??
         state.enderecoCep?.bairroId;
@@ -677,11 +744,11 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
       return;
     }
 
-    if (_fotos.isEmpty) {
+    final cpfLimpo = _cpfController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (!CpfValidator.isValid(cpfLimpo)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-              'Por favor, anexe pelo menos 1 foto como evidência (de 1 a 3 fotos).'),
+          content: Text('Informe um CPF válido.'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -748,10 +815,15 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
           }
 
           if (state.enderecoCep != null) {
-            _logradouroController.text = state.enderecoCep!.logradouro;
-            _bairroController.text = state.enderecoCep!.nomeBairro;
-            _bairroId = state.enderecoCep!.bairroId;
-            _numeroFocusNode.requestFocus();
+            if (!identical(state.enderecoCep, _ultimoEnderecoCepPreenchido)) {
+              _ultimoEnderecoCepPreenchido = state.enderecoCep;
+              _logradouroController.text = state.enderecoCep!.logradouro;
+              _bairroController.text = state.enderecoCep!.nomeBairro;
+              _bairroId = state.enderecoCep!.bairroId;
+              _numeroFocusNode.requestFocus();
+            }
+          } else {
+            _ultimoEnderecoCepPreenchido = null;
           }
 
           if (state.submissionStatus == FormSubmissionStatus.success &&
@@ -802,399 +874,408 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
                 behavior: HitTestBehavior.opaque,
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'Registre um problema na cidade',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkBlue,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Nome do Munícipe
-                      _buildLabel('Nome Completo'),
-                      AppTextField(
-                        controller: _nomeController,
-                        hintText: 'Digite seu nome completo',
-                        textCapitalization: TextCapitalization.words,
-                        validator: (val) {
-                          if (val == null || val.trim().isEmpty) {
-                            return 'Informe o seu nome';
-                          }
-                          if (val.trim().length < 3) {
-                            return 'Nome muito curto';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // CPF do Solicitante
-                      _buildLabel('CPF do Solicitante'),
-                      CpfTextField(
-                        controller: _cpfController,
-                        focusNode: _cpfFocusNode,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Celular (WhatsApp)
-                      _buildLabel('Celular (WhatsApp)'),
-                      AppTextField(
-                        controller: _celularController,
-                        focusNode: _celularFocusNode,
-                        keyboardType: TextInputType.phone,
-                        inputFormatters: [_celularFormatter],
-                        hintText: '(11) 99999-9999',
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return 'Informe o celular';
-                          }
-                          if (val.length < 14) {
-                            return 'Informe um celular válido';
-                          }
-                          return null;
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                        child: Text(
-                          'Este número será utilizado para enviar o protocolo e as atualizações de status.',
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Registre um problema na cidade',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkBlue,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      _buildLabel('Endereço da Ocorrência'),
-                      const SizedBox(height: 2),
+                        // Nome do Munícipe
+                        _buildLabel('Nome Completo'),
+                        AppTextField(
+                          controller: _nomeController,
+                          hintText: 'Digite seu nome completo',
+                          textCapitalization: TextCapitalization.words,
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'Informe o seu nome';
+                            }
+                            if (val.trim().length < 3) {
+                              return 'Nome muito curto';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
 
-                      // CEP com botão de GPS ao lado
-                      _buildLabel('CEP (Opcional)'),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: AppTextField(
-                              controller: _cepController,
-                              focusNode: _cepFocusNode,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [_cepFormatter],
-                              hintText: '00000-000',
-                              customErrorText: state.erroCep,
-                              suffixIcon: state.isBuscandoCep
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                        // CPF do Solicitante
+                        _buildLabel('CPF do Solicitante'),
+                        CpfTextField(
+                          controller: _cpfController,
+                          focusNode: _cpfFocusNode,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Celular (WhatsApp)
+                        _buildLabel('Celular (WhatsApp)'),
+                        AppTextField(
+                          controller: _celularController,
+                          focusNode: _celularFocusNode,
+                          keyboardType: TextInputType.phone,
+                          inputFormatters: [_celularFormatter],
+                          hintText: '(11) 99999-9999',
+                          validator: (val) {
+                            if (val == null || val.isEmpty) {
+                              return 'Informe o celular';
+                            }
+                            if (val.length < 14) {
+                              return 'Informe um celular válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                          child: Text(
+                            'Este número será utilizado para enviar o protocolo e as atualizações de status.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        _buildLabel('Endereço da Ocorrência'),
+                        const SizedBox(height: 2),
+
+                        // CEP com botão de GPS ao lado
+                        _buildLabel('CEP (Opcional)'),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: AppTextField(
+                                controller: _cepController,
+                                focusNode: _cepFocusNode,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [_cepFormatter],
+                                hintText: '00000-000',
+                                customErrorText: state.erroCep,
+                                suffixIcon: state.isBuscandoCep
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                      )
+                                    : InkWell(
+                                        onTap: _buscarCepManual,
+                                        child: const Icon(
+                                          Icons.search,
                                           color: AppColors.primary,
                                         ),
                                       ),
-                                    )
-                                  : InkWell(
-                                      onTap: _buscarCepManual,
-                                      child: const Icon(
-                                        Icons.search,
-                                        color: AppColors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap:
+                                  _isFetchingGps ? null : _obterEnderecoPorGps,
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                height: 52,
+                                width: 52,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary
+                                          .withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: _isFetchingGps
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(14.0),
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.location_on_sharp,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Bairro Dropdown com Autocomplete
+                        _buildLabel('Bairro'),
+                        AppTextField(
+                          key: _bairroKey,
+                          controller: _bairroController,
+                          readOnly: true,
+                          hintText: 'Selecione o bairro',
+                          suffixIcon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.grey,
+                          ),
+                          onTap: _abrirSelecaoBairro,
+                          validator: (val) =>
+                              (val == null || val.trim().isEmpty)
+                                  ? 'Selecione o bairro'
+                                  : null,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Logradouro
+                        _buildLabel('Logradouro (Rua / Avenida)'),
+                        AppTextField(
+                          controller: _logradouroController,
+                          hintText: 'Ex: Rua das Flores',
+                          validator: (val) =>
+                              (val == null || val.trim().isEmpty)
+                                  ? 'Informe o logradouro'
+                                  : null,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Número
+                        _buildLabel('Número'),
+                        AppTextField(
+                          focusNode: _numeroFocusNode,
+                          controller: _numeroController,
+                          keyboardType: TextInputType.text,
+                          enabled: isCepPreenchido,
+                          hintText: isCepPreenchido ? 'Ex: 1200' : 'Ex: 1200',
+                          validator: (val) {
+                            if (isCepPreenchido &&
+                                (val == null || val.trim().isEmpty)) {
+                              return 'Informe o nº';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Categoria
+                        _buildLabel('Categoria'),
+                        AppTextField(
+                          key: _categoriaKey,
+                          controller: _categoriaController,
+                          readOnly: true,
+                          hintText: state.isLoadingCategorias
+                              ? 'Carregando categorias...'
+                              : 'Selecione uma categoria',
+                          suffixIcon: state.isLoadingCategorias
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.grey,
+                                ),
+                          onTap: state.isLoadingCategorias
+                              ? null
+                              : () => _abrirSelecaoCategoria(state.categorias),
+                          validator: (val) => state.categoriaSelecionada == null
+                              ? 'Selecione uma categoria'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Serviço
+                        _buildLabel('Serviço'),
+                        AppTextField(
+                          key: _servicoKey,
+                          controller: _servicoController,
+                          readOnly: true,
+                          hintText: state.categoriaSelecionada == null
+                              ? 'Selecione a categoria primeiro'
+                              : (state.isLoadingServicos
+                                  ? 'Carregando serviços...'
+                                  : 'Selecione o serviço'),
+                          suffixIcon: state.isLoadingServicos
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.grey,
+                                ),
+                          onTap: (state.categoriaSelecionada == null ||
+                                  state.isLoadingServicos)
+                              ? null
+                              : () => _abrirSelecaoServico(state.servicos),
+                          validator: (val) => state.servicoSelecionado == null
+                              ? 'Selecione um serviço'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Descrição
+                        _buildLabel('Descrição detalhada'),
+                        AppTextField(
+                          key: _descricaoKey,
+                          controller: _descricaoController,
+                          hintText: 'Explique o problema detalhadamente...',
+                          alignLabelWithHint: true,
+                          minLines: 3,
+                          maxLines: 6,
+                          maxLength: 500,
+                          textCapitalization: TextCapitalization.sentences,
+                          onTap: () {
+                            Future.delayed(const Duration(milliseconds: 300),
+                                () {
+                              if (!mounted) return;
+                              final ctx = _descricaoKey.currentContext;
+                              if (ctx != null && ctx.mounted) {
+                                Scrollable.ensureVisible(
+                                  ctx,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                  alignment: 0.2,
+                                );
+                              }
+                            });
+                          },
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) {
+                              return 'Descreva o problema detalhadamente';
+                            }
+                            if (val.trim().length <= 10) {
+                              return 'A descrição deve ter mais de 10 caracteres';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Fotos (Opcional - até 3 fotos)
+                        _buildLabel('Fotos (até 3)'),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ..._fotos.map((foto) {
+                              return Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(foto.path),
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: -8,
+                                    top: -8,
+                                    child: InkWell(
+                                      onTap: () =>
+                                          setState(() => _fotos.remove(foto)),
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
                                       ),
                                     ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          InkWell(
-                            onTap: _isFetchingGps ? null : _obterEnderecoPorGps,
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              height: 52,
-                              width: 52,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary
-                                        .withValues(alpha: 0.3),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
                                   ),
                                 ],
-                              ),
-                              child: _isFetchingGps
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(14.0),
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.location_on_sharp,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Bairro Dropdown com Autocomplete
-                      _buildLabel('Bairro'),
-                      AppTextField(
-                        key: _bairroKey,
-                        controller: _bairroController,
-                        readOnly: true,
-                        hintText: 'Selecione o bairro',
-                        suffixIcon: const Icon(
-                          Icons.arrow_drop_down,
-                          color: Colors.grey,
-                        ),
-                        onTap: _abrirSelecaoBairro,
-                        validator: (val) =>
-                            (val == null || val.trim().isEmpty)
-                                ? 'Selecione o bairro'
-                                : null,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Logradouro
-                      _buildLabel('Logradouro (Rua / Avenida)'),
-                      AppTextField(
-                        controller: _logradouroController,
-                        hintText: 'Ex: Rua das Flores',
-                        validator: (val) => (val == null || val.trim().isEmpty)
-                            ? 'Informe o logradouro'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Número
-                      _buildLabel('Número'),
-                      AppTextField(
-                        focusNode: _numeroFocusNode,
-                        controller: _numeroController,
-                        keyboardType: TextInputType.text,
-                        enabled: isCepPreenchido,
-                        hintText: isCepPreenchido ? 'Ex: 1200' : 'Ex: 1200',
-                        validator: (val) {
-                          if (isCepPreenchido &&
-                              (val == null || val.trim().isEmpty)) {
-                            return 'Informe o nº';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Categoria
-                      _buildLabel('Categoria'),
-                      AppTextField(
-                        key: _categoriaKey,
-                        controller: _categoriaController,
-                        readOnly: true,
-                        hintText: state.isLoadingCategorias
-                            ? 'Carregando categorias...'
-                            : 'Selecione uma categoria',
-                        suffixIcon: state.isLoadingCategorias
-                            ? const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            : const Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.grey,
-                              ),
-                        onTap: state.isLoadingCategorias
-                            ? null
-                            : () => _abrirSelecaoCategoria(state.categorias),
-                        validator: (val) => state.categoriaSelecionada == null
-                            ? 'Selecione uma categoria'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Serviço
-                      _buildLabel('Serviço'),
-                      AppTextField(
-                        key: _servicoKey,
-                        controller: _servicoController,
-                        readOnly: true,
-                        hintText: state.categoriaSelecionada == null
-                            ? 'Selecione a categoria primeiro'
-                            : (state.isLoadingServicos
-                                ? 'Carregando serviços...'
-                                : 'Selecione o serviço'),
-                        suffixIcon: state.isLoadingServicos
-                            ? const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              )
-                            : const Icon(
-                                Icons.arrow_drop_down,
-                                color: Colors.grey,
-                              ),
-                        onTap: (state.categoriaSelecionada == null ||
-                                state.isLoadingServicos)
-                            ? null
-                            : () => _abrirSelecaoServico(state.servicos),
-                        validator: (val) => state.servicoSelecionado == null
-                            ? 'Selecione um serviço'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Descrição
-                      _buildLabel('Descrição detalhada'),
-                      AppTextField(
-                        key: _descricaoKey,
-                        controller: _descricaoController,
-                        hintText: 'Explique o problema detalhadamente...',
-                        alignLabelWithHint: true,
-                        minLines: 3,
-                        maxLines: 6,
-                        maxLength: 500,
-                        textCapitalization: TextCapitalization.sentences,
-                        onTap: () {
-                          Future.delayed(const Duration(milliseconds: 300), () {
-                            if (!mounted) return;
-                            final ctx = _descricaoKey.currentContext;
-                            if (ctx != null && ctx.mounted) {
-                              Scrollable.ensureVisible(
-                                ctx,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                                alignment: 0.2,
                               );
-                            }
-                          });
-                        },
-                        validator: (val) => (val == null || val.trim().isEmpty)
-                            ? 'Descreva o problema'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Fotos (1 a 3 fotos)
-                      _buildLabel('Fotos (até 3)'),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          ..._fotos.map((foto) {
-                            return Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    File(foto.path),
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Positioned(
-                                  right: -8,
-                                  top: -8,
-                                  child: InkWell(
-                                    onTap: () =>
-                                        setState(() => _fotos.remove(foto)),
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
+                            }),
+                            if (_fotos.length < 3)
+                              InkWell(
+                                onTap: _abrirOpcoesDeFoto,
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                      style: BorderStyle.solid,
                                     ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
-                          if (_fotos.length < 3)
-                            InkWell(
-                              onTap: _abrirOpcoesDeFoto,
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.grey.shade400,
-                                    style: BorderStyle.solid,
+                                  child: const Icon(
+                                    Icons.add_a_photo,
+                                    color: Colors.grey,
+                                    size: 32,
                                   ),
-                                ),
-                                child: const Icon(
-                                  Icons.add_a_photo,
-                                  color: Colors.grey,
-                                  size: 32,
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-
-                      // Botão de Envio
-                      SizedBox(
-                        height: 54,
-                        child: ElevatedButton(
-                          onPressed: isSubmitting ? null : _enviarSolicitacao,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: isSubmitting
-                              ? const CircularProgressIndicator(
-                                  color: Colors.white,
-                                )
-                              : const Text(
-                                  'Enviar Solicitação',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 48),
-                    ],
+                        const SizedBox(height: 32),
+
+                        // Botão de Envio
+                        SizedBox(
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: isSubmitting ? null : _enviarSolicitacao,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.secondary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: isSubmitting
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text(
+                                    'Enviar Solicitação',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
+          );
         },
       ),
     );
