@@ -7,6 +7,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:palma_da_mao/core/components/app_error_modal.dart';
+import 'package:palma_da_mao/core/components/app_error_state.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/components/app_success_modal.dart';
 import 'package:palma_da_mao/core/components/app_text_field.dart';
@@ -842,17 +844,32 @@ class _FormularioZeladoriaPageState extends State<FormularioZeladoriaPage> {
             );
           }
 
-          if (state.submissionStatus == FormSubmissionStatus.failure &&
-              state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Erro ao enviar: ${state.errorMessage!}'),
-                backgroundColor: Colors.red,
-              ),
+          if (state.submissionStatus == FormSubmissionStatus.failure) {
+            AppErrorModal.show(
+              context,
+              onPressed: () {
+                _cubit.resetSubmissionStatus();
+              },
             );
           }
         },
         builder: (context, state) {
+          if (state.isLoadingCategorias && state.categorias.isEmpty) {
+            return const AppStandardPage(
+              title: 'Zeladoria',
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          if (!state.isLoadingCategorias && state.categorias.isEmpty) {
+            return const AppStandardPage(
+              title: 'Zeladoria',
+              body: AppErrorState(),
+            );
+          }
+
           final isSubmitting =
               state.submissionStatus == FormSubmissionStatus.submitting;
           final isCepPreenchido =

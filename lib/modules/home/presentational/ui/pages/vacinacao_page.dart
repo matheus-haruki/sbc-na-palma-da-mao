@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:palma_da_mao/core/components/app_error_state.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -38,15 +39,7 @@ class _VacinacaoPageState extends State<VacinacaoPage> {
           }
 
           if (state is VacinacaoError) {
-            return Center(
-              child: Text(
-                'Ocorreu um erro ao carregar os dados:\n${state.message}',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: AppColors.error,
-                ),
-              ),
-            );
+            return const AppErrorState();
           }
 
           if (state is VacinacaoSuccess) {

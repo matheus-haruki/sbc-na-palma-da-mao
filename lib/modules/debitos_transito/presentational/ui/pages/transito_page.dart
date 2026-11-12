@@ -9,6 +9,7 @@ import 'package:palma_da_mao/core/components/cpf_text_field.dart';
 import 'package:palma_da_mao/modules/debitos_transito/presentational/controllers/transito_cubit.dart';
 import 'package:palma_da_mao/modules/debitos_transito/presentational/controllers/transito_state.dart';
 import 'package:palma_da_mao/core/components/app_empty_state.dart';
+import 'package:palma_da_mao/core/components/app_error_state.dart';
 import 'package:palma_da_mao/core/components/app_shimmer_list.dart';
 
 class TransitoPage extends StatefulWidget {
@@ -107,14 +108,8 @@ class _TransitoPageState extends State<TransitoPage> {
                     padding: EdgeInsets.all(16),
                   );
                 } else if (state is TransitoError) {
-                    return Center(
-                      child: Text(
-                        state.message,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  } else if (state is TransitoSuccess) {
+                  return const AppErrorState();
+                } else if (state is TransitoSuccess) {
                     if (state.debitos.isEmpty) {
                       return const AppEmptyState(
                         message: 'Nenhuma multa encontrada.',

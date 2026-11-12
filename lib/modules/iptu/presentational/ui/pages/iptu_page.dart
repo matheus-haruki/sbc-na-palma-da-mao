@@ -10,6 +10,7 @@ import 'package:palma_da_mao/modules/iptu/presentational/controllers/iptu_cubit.
 import 'package:palma_da_mao/modules/iptu/presentational/controllers/iptu_state.dart';
 import 'package:palma_da_mao/core/components/app_shimmer_list.dart';
 import 'package:palma_da_mao/core/components/app_empty_state.dart';
+import 'package:palma_da_mao/core/components/app_error_state.dart';
 import 'package:palma_da_mao/modules/iptu/models/debito_model.dart';
 
 class IptuPage extends StatefulWidget {
@@ -138,14 +139,8 @@ class _IptuPageState extends State<IptuPage> {
                     padding: EdgeInsets.all(16),
                   );
                 } else if (state is IptuError) {
-                    return Center(
-                      child: Text(
-                        state.message,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  } else if (state is IptuSuccess) {
+                  return const AppErrorState();
+                } else if (state is IptuSuccess) {
                     if (state.debitos.isEmpty) {
                       return const AppEmptyState(
                         message: 'Nenhum débito encontrado.',

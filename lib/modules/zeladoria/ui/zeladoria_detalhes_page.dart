@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
+import 'package:palma_da_mao/core/components/app_error_state.dart';
 import 'package:palma_da_mao/core/components/app_input_container.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
 import 'package:palma_da_mao/core/design_system/app_colors.dart';
@@ -165,35 +166,7 @@ class _ZeladoriaDetalhesPageState extends State<ZeladoriaDetalhesPage> {
             }
 
             if (state is ZeladoriaDetalhesError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 48,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        state.message,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => _cubit.buscarDetalhes(
-                          cpfMunicipe: _cpf,
-                          protocolo: _protocolo,
-                        ),
-                        child: const Text('Tentar novamente'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return const AppErrorState();
             }
 
             if (state is ZeladoriaDetalhesSuccess) {

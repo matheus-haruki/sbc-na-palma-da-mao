@@ -17,7 +17,13 @@ class HomeModule extends Module {
   void binds(Injector i) {
     i.add<HomeCubit>(HomeCubit.new);
     i.add<Dio>(() {
-      final dio = Dio();
+      final dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 25),
+          sendTimeout: const Duration(seconds: 30),
+        ),
+      );
       dio.httpClientAdapter = IOHttpClientAdapter(
         createHttpClient: () {
           final client = HttpClient();

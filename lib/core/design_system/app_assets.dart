@@ -28,6 +28,7 @@ abstract class AppAssets {
   static const String iconeCarro2 = '$_iconPath/car2.svg';
   static const String iconeVazio = '$_iconPath/empty.png';
   static const String tecnocompLogo = '$_iconPath/tecnocomp-logo.png';
+  static const String iconeErro = '$_iconPath/aviso.png';
 
   static const String loadingAnimation = 'assets/lottie/loading.json';
   static const String dogAnimation = 'assets/lottie/dog.json';

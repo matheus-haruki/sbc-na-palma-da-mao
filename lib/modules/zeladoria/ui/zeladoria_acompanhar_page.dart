@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:intl/intl.dart';
 import 'package:palma_da_mao/core/components/app_empty_state.dart';
+import 'package:palma_da_mao/core/components/app_error_state.dart';
 import 'package:palma_da_mao/core/components/app_primary_button.dart';
 import 'package:palma_da_mao/core/components/app_shimmer_list.dart';
 import 'package:palma_da_mao/core/components/app_standard_page.dart';
@@ -156,17 +157,7 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
               ),
             Expanded(
               child:
-                  BlocConsumer<ZeladoriaConsultaCubit, ZeladoriaConsultaState>(
-                listener: (context, state) {
-                  if (state is ZeladoriaConsultaError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
+                  BlocBuilder<ZeladoriaConsultaCubit, ZeladoriaConsultaState>(
                 builder: (context, state) {
                   if (state is ZeladoriaConsultaLoading) {
                     return const AppShimmerList(padding: EdgeInsets.all(16));
@@ -180,6 +171,10 @@ class _ZeladoriaAcompanharPageState extends State<ZeladoriaAcompanharPage> {
                     return const AppEmptyState(
                       message: 'Nenhuma solicitação encontrada para este CPF.',
                     );
+                  }
+
+                  if (state is ZeladoriaConsultaError) {
+                    return const AppErrorState();
                   }
 
                   if (state is ZeladoriaConsultaSuccess) {

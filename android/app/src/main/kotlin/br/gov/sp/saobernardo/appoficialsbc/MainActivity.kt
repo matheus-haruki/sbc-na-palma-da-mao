@@ -1,4 +1,4 @@
-package com.example.palma_da_mao
+package br.gov.sp.saobernardo.appoficialsbc
 
 import io.flutter.embedding.android.FlutterActivity
 
