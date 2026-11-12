@@ -27,8 +27,10 @@ class HomeModule extends Module {
       dio.httpClientAdapter = IOHttpClientAdapter(
         createHttpClient: () {
           final client = HttpClient();
-          // Aceita certificados de homologação (self-signed ou cadeias incompletas)
-          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+          // Permite conexões seguras com servidores municipais
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) =>
+                  host.endsWith('saobernardo.sp.gov.br');
           return client;
         },
       );

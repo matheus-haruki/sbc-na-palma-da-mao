@@ -23,7 +23,9 @@ class IptuModule extends Module {
       dio.httpClientAdapter = IOHttpClientAdapter(
         createHttpClient: () {
           final client = HttpClient();
-          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) =>
+                  host.endsWith('saobernardo.sp.gov.br');
           return client;
         },
       );

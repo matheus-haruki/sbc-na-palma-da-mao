@@ -27,7 +27,8 @@ class ZeladoriaModule extends Module {
         createHttpClient: () {
           final client = HttpClient();
           client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) => true;
+              (X509Certificate cert, String host, int port) =>
+                  host.endsWith('saobernardo.sp.gov.br');
           return client;
         },
       );
