@@ -17,14 +17,17 @@ class ParcelaModel {
     required this.status,
   });
 
-  factory ParcelaModel.fromJson(Map<String, dynamic> json) {
+  factory ParcelaModel.fromJson(Map<String, dynamic> json, {DateTime? currentDate}) {
     // Tratamento de Datas
     DateTime? parseDate(String? dateStr) {
       if (dateStr == null) return null;
       final cleanStr = dateStr.trim();
       if (cleanStr.isEmpty) return null;
       try {
-        return DateFormat('dd/MM/yyyy').parse(cleanStr);
+        if (cleanStr.contains('/')) {
+          return DateFormat('dd/MM/yyyy').parse(cleanStr);
+        }
+        return DateTime.tryParse(cleanStr);
       } catch (_) {
         return null;
       }
@@ -44,11 +47,25 @@ class ParcelaModel {
     final statusStr = json['statusDePagamento']?.toString().trim().toUpperCase();
     ParcelaStatus status;
 
-    if (statusStr != null && statusStr.startsWith('PAGO')) {
+    if (statusStr != null && (statusStr.startsWith('PAG') || statusStr.startsWith('LIQUID'))) {
       status = ParcelaStatus.paga;
     } else {
-      if (dataVencimento != null && dataVencimento.isBefore(DateTime.now())) {
-        status = ParcelaStatus.vencida;
+      if (dataVencimento != null) {
+        final now = currentDate ?? DateTime.now();
+        final hoje = DateTime(now.year, now.month, now.day);
+        final vencimentoSemHora = DateTime(
+          dataVencimento.year,
+          dataVencimento.month,
+          dataVencimento.day,
+        );
+
+        // A parcela só é considerada vencida se o dia de vencimento for estritamente anterior a hoje.
+        // Se vencer hoje, ainda está no prazo de pagamento e deve constar como em aberto.
+        if (vencimentoSemHora.isBefore(hoje)) {
+          status = ParcelaStatus.vencida;
+        } else {
+          status = ParcelaStatus.emAberto;
+        }
       } else {
         status = ParcelaStatus.emAberto;
       }

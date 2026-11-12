@@ -23,10 +23,16 @@ class IptuDetalhesCubit extends Cubit<IptuDetalhesState> {
       
       final emAberto = todasParcelas.where((p) => p.status == ParcelaStatus.emAberto).toList();
       
-      // Ordena as em aberto pela data de vencimento
+      // Ordena as em aberto pela data de vencimento e número da parcela como desempate
       emAberto.sort((a, b) {
-        if (a.dataVencimento == null || b.dataVencimento == null) return 0;
-        return a.dataVencimento!.compareTo(b.dataVencimento!);
+        if (a.dataVencimento != null && b.dataVencimento != null) {
+          final cmp = a.dataVencimento!.compareTo(b.dataVencimento!);
+          if (cmp != 0) return cmp;
+        }
+        if (a.numeroParcela != null && b.numeroParcela != null) {
+          return a.numeroParcela!.compareTo(b.numeroParcela!);
+        }
+        return 0;
       });
 
       ParcelaModel? proximaParcela;

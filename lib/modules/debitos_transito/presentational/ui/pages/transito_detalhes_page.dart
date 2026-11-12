@@ -334,7 +334,9 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Existem ${state.parcelasVencidas.length} parcelas em atraso. Procure a Dívida Ativa ou gere um boleto atualizado.',
+                                  state.parcelasVencidas.length == 1
+                                      ? 'Existe 1 parcela em atraso. Procure a Dívida Ativa ou gere um boleto atualizado.'
+                                      : 'Existem ${state.parcelasVencidas.length} parcelas em atraso. Procure a Dívida Ativa ou gere um boleto atualizado.',
                                   style: TextStyle(
                                     color: Colors.red.shade900,
                                     fontWeight: FontWeight.w500,
@@ -473,7 +475,14 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
 
     int diasRestantes = 0;
     if (parcela.dataVencimento != null) {
-      diasRestantes = parcela.dataVencimento!.difference(DateTime.now()).inDays;
+      final now = DateTime.now();
+      final hoje = DateTime(now.year, now.month, now.day);
+      final vencimento = DateTime(
+        parcela.dataVencimento!.year,
+        parcela.dataVencimento!.month,
+        parcela.dataVencimento!.day,
+      );
+      diasRestantes = vencimento.difference(hoje).inDays;
     }
 
     return Container(
@@ -520,7 +529,9 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                 Text(
                   diasRestantes == 0
                       ? 'Vence hoje'
-                      : 'Vence em $diasRestantes dias',
+                      : diasRestantes == 1
+                          ? 'Vence amanhã'
+                          : 'Vence em $diasRestantes dias',
                   style: const TextStyle(
                     color: Colors.orange,
                     fontWeight: FontWeight.bold,
