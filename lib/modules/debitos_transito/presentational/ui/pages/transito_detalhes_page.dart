@@ -445,9 +445,9 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                                           color: Colors.white,
                                           strokeWidth: 2.5),
                                     )
-                                  : Text(
-                                      'Pagar Total - ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(valorTotalAberto)}',
-                                      style: const TextStyle(
+                                  : const Text(
+                                      'Pagar Multa',
+                                      style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -505,27 +505,10 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  'Parcela ${parcela.numeroParcela ?? "-"}',
-                  style: const TextStyle(
-                    color: AppColors.secondary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              if (diasRestantes >= 0)
+          if (diasRestantes >= 0) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
                 Text(
                   diasRestantes == 0
                       ? 'Vence hoje'
@@ -538,11 +521,12 @@ class _TransitoDetalhesPageState extends State<TransitoDetalhesPage> {
                     fontSize: 13,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 20),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           const Text(
-            'Valor da parcela',
+            'Valor da multa',
             style: TextStyle(color: Colors.grey, fontSize: 13),
           ),
           const SizedBox(height: 4),

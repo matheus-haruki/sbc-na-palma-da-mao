@@ -5,15 +5,38 @@ import 'package:palma_da_mao/modules/iptu/models/guia_pagamento_model.dart';
 class IptuRepository {
   final Dio _dio;
 
+  // ===========================================================================
+  // TODO: [IMPORTANTE - ANTES DE SUBIR PARA PRODUÇÃO]
+  //       Alterar a variável useHomolog para false para que a aplicação utilize o ambiente de produção e Vice e Versa!! atualmente está configurado para produção.
+  // ===========================================================================
+  static const bool useHomolog = false;
+
+  // Base URLs
+  static const String _prodBaseUrl =
+      'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos';
+  static const String _hmgBaseUrl =
+      'http://dti-pwebhmg-02:8080/consulta-de-debitos';
+
+  static String get baseUrl => useHomolog ? _hmgBaseUrl : _prodBaseUrl;
+
+  // Códigos de Sistema (Identificação da Aplicação)
+  static const String _prodCodigoSistema =
+      '8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e';
+  static const String _hmgCodigoSistema =
+      '7f3a91c4-8b27-11f1-a6d2-3e5c9b71f804';
+
+  static String get codigoSistema =>
+      useHomolog ? _hmgCodigoSistema : _prodCodigoSistema;
+
   IptuRepository(this._dio);
 
   Future<List<DebitoModel>> consultarDebitos(String cpf) async {
     try {
       final response = await _dio.post(
-        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-debitos-de-iptu',
+        '$baseUrl/chat-bot/consulta-debitos-de-iptu',
         data: {
           "cpf": cpf,
-          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+          "codigoSistema": codigoSistema,
         },
       );
 
@@ -39,10 +62,10 @@ class IptuRepository {
   Future<Map<String, dynamic>> consultarDetalhes(String lancamento) async {
     try {
       final response = await _dio.post(
-        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-detalhes-por-lancamento',
+        '$baseUrl/chat-bot/consulta-detalhes-por-lancamento',
         data: {
           "lancamento": lancamento,
-          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+          "codigoSistema": codigoSistema,
         },
       );
 
@@ -68,10 +91,10 @@ class IptuRepository {
   }) async {
     try {
       final response = await _dio.post(
-        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/consulta-boleto',
+        '$baseUrl/chat-bot/consulta-boleto',
         data: {
           "lancamento": lancamento,
-          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+          "codigoSistema": codigoSistema,
         },
       );
 
@@ -103,11 +126,11 @@ class IptuRepository {
   }) async {
     try {
       final response = await _dio.post(
-        'https://consultadebitos.saobernardo.sp.gov.br/consulta-de-debitos/chat-bot/emissao-de-boleto-por-parcela',
+        '$baseUrl/chat-bot/emissao-de-boleto-por-parcela',
         data: {
           "lancamento": lancamento,
           "parcela": parcela.toString(),
-          "codigoSistema": "8de4eb61-0c74-46ac-bb0a-e2c7f2609c2e",
+          "codigoSistema": codigoSistema,
         },
       );
 
