@@ -4,6 +4,8 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -35,6 +37,8 @@
 	<key>NSCameraUsageDescription</key>
 	<string>O aplicativo utiliza a câmera para que você possa fotografar e anexar evidências visuais às solicitações de serviços municipais.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Sua localização é utilizada exclusivamente para preencher e indicar com precisão o local da ocorrência do serviço municipal.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Sua localização é utilizada exclusivamente para preencher e indicar com precisão o local da ocorrência do serviço municipal.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>O aplicativo necessita de acesso à galeria para que você escolha fotos e comprovantes para anexar às suas solicitações.</string>
