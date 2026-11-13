@@ -62,6 +62,7 @@ class SquareButton extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               softWrap: true,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.w600,

@@ -49,4 +49,7 @@ key.properties
 android/key.properties
 *.jks
 *.keystore
+*.zip
+backup_credenciais_deploy/
+
 

@@ -104,12 +104,14 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textScaler = MediaQuery.textScalerOf(context);
+    final alturaCarrossel = textScaler.scale(115.0).clamp(115.0, 140.0);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 115,
+          height: alturaCarrossel,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) {
@@ -125,22 +127,28 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
 
               final Widget animacaoWidget = SizedBox(
                 child: Center(
-                  child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover,height: 100),
+                  child: Lottie.asset(noticia.lottiePath, fit: BoxFit.cover, height: 80),
                 ),
               );
 
               final Widget textoWidget = Expanded(
-                child: Text(
-                  noticia.titulo,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: isAnimacaoEsquerda
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: Text(
+                    noticia.titulo,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign:
+                        isAnimacaoEsquerda ? TextAlign.left : TextAlign.right,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign:
-                      isAnimacaoEsquerda ? TextAlign.left : TextAlign.right,
                 ),
               );
 

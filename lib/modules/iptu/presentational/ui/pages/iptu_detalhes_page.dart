@@ -146,10 +146,13 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
-                            child: Text(
-                              guiaState.guia.linhaDigitavel,
-                              style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 1.5),
-                              textAlign: TextAlign.center,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                guiaState.guia.linhaDigitavel,
+                                style: const TextStyle(fontFamily: 'Courier', fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 1.5),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -389,35 +392,40 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
                       ],
                     ),
                     child: SafeArea(
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 54,
-                        child: BlocBuilder<IptuGuiaCubit, IptuGuiaState>(
-                          bloc: _guiaCubit,
-                          builder: (context, guiaState) {
-                            final isLoading = guiaState is IptuGuiaLoading;
-                            return ElevatedButton(
-                              onPressed: isLoading ? null : () => _abrirModalGuia(),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.secondary,
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 52),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: BlocBuilder<IptuGuiaCubit, IptuGuiaState>(
+                            bloc: _guiaCubit,
+                            builder: (context, guiaState) {
+                              final isLoading = guiaState is IptuGuiaLoading;
+                              return ElevatedButton(
+                                onPressed: isLoading ? null : () => _abrirModalGuia(),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.secondary,
+                                  foregroundColor: Colors.white,
+                                  disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.6),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
-                              ),
-                              child: isLoading
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                                    )
-                                  : Text(
-                                      'Pagar Total - ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(valorTotalAberto)}',
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                            );
-                          },
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                      )
+                                    : FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          'Pagar Total - ${NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$').format(valorTotalAberto)}',
+                                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -511,12 +519,16 @@ class _IptuDetalhesPageState extends State<IptuDetalhesPage> {
             style: TextStyle(color: Colors.grey, fontSize: 13),
           ),
           const SizedBox(height: 4),
-          Text(
-            currencyFormatter.format(parcela.valor),
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: AppColors.darkBlue,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              currencyFormatter.format(parcela.valor),
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: AppColors.darkBlue,
+              ),
             ),
           ),
           const SizedBox(height: 8),

@@ -20,3 +20,5 @@
 -keep class * implements io.flutter.plugin.common.MethodChannel$MethodCallHandler { *; }
 -dontwarn java.awt.**
 -dontwarn javax.annotation.**
+-dontwarn com.google.android.play.core.**
+

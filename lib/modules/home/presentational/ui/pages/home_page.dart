@@ -30,6 +30,27 @@ class _HomePageState extends State<HomePage> {
     _cubit.carregarDashboard();
   }
 
+  Widget _buildHeader(ThemeData theme) {
+    return Row(
+      children: [
+        Image.asset(
+          AppAssets.logo,
+          width: 120,
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            '${GreetingHelper.getGreeting()}\nComo podemos te ajudar hoje?',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Captura o tema global e o esquema de cores para reuso
@@ -37,64 +58,36 @@ class _HomePageState extends State<HomePage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true,
-            expandedHeight: 140,
-            backgroundColor: AppColors.background,
-            flexibleSpace: FlexibleSpaceBar(
-              background: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        AppAssets.logo,
-                        width: 120,
-                        fit: BoxFit.contain,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(theme),
+              const SizedBox(height: 20),
+              BlocBuilder<HomeCubit, HomeState>(
+                bloc: _cubit,
+                builder: (context, state) {
+                  return switch (state) {
+                    HomeInitial() || HomeLoading() => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 80),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 40.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${GreetingHelper.getGreeting()}\nComo podemos te ajudar hoje?',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                    HomeError(message: final msg) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 80),
+                        child: Center(
+                          child: Text(
+                            msg,
+                            style: TextStyle(color: colorScheme.error),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SliverFillRemaining(
-            child: BlocBuilder<HomeCubit, HomeState>(
-              bloc: _cubit,
-              builder: (context, state) {
-                return switch (state) {
-                  HomeInitial() || HomeLoading() => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  HomeError(message: final msg) => Center(
-                      child: Text(
-                        msg,
-                        style: TextStyle(color: colorScheme.error),
-                      ),
-                    ),
-                  HomeSuccess(atalhos: final atalhos) => SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
+                    HomeSuccess(atalhos: final atalhos) => Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 2. Título da Seção
@@ -109,7 +102,9 @@ class _HomePageState extends State<HomePage> {
                           // 3. Grid de Serviços
                           SizedBox(
                             // A altura agora define o tamanho do card inteiro
-                            height: 120,
+                            height: MediaQuery.textScalerOf(context)
+                                .scale(120.0)
+                                .clamp(120.0, 145.0),
                             child: ListView.separated(
                               clipBehavior: Clip.none,
                               scrollDirection: Axis.horizontal,
@@ -168,7 +163,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(height: 16),
                           SizedBox(
-                            height: 112,
+                            height: MediaQuery.textScalerOf(context)
+                                .scale(112.0)
+                                .clamp(112.0, 138.0),
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               physics: const BouncingScrollPhysics(),
@@ -207,64 +204,67 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(height: 16),
 
                           // Linha contendo os dois cards dividindo o espaço
-                          Row(
-                            children: [
-                              // Primeiro Card (Padrão)
-                              Expanded(
-                                child: ContactCard(
-                                  title: 'Fale Conosco',
-                                  subtitle: 'Telefones',
-                                  iconPath: AppAssets
-                                      .iconeTelefone, // Lembre-se de adicionar no app_assets.dart
-                                  backgroundColor: AppColors.surface,
-                                  borderColor: AppColors.border,
-                                  iconBackgroundColor: AppColors
-                                      .backgroundGray, // Fundo azul claro pro ícone
-                                  iconColor:
-                                      colorScheme.onSurface, // Ícone escuro
-                                  onTap: () {
-                                    Modular.to.pushNamed('./fale-conosco');
-                                  },
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 12,
-                              ), // Espaçamento entre os cards
-                              // Segundo Card (Alerta/Emergência)
-                              Expanded(
-                                child: ContactCard(
-                                  title: 'Emergência',
-                                  subtitle: 'LIGAR',
-                                  iconPath: AppAssets.iconeAlerta,
-                                  backgroundColor:
-                                      AppColors.lightRed.withValues(
-                                    alpha: 0.4,
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // Primeiro Card (Padrão)
+                                Expanded(
+                                  child: ContactCard(
+                                    title: 'Fale Conosco',
+                                    subtitle: 'Telefones',
+                                    iconPath: AppAssets
+                                        .iconeTelefone, // Lembre-se de adicionar no app_assets.dart
+                                    backgroundColor: AppColors.surface,
+                                    borderColor: AppColors.border,
+                                    iconBackgroundColor: AppColors
+                                        .backgroundGray, // Fundo azul claro pro ícone
+                                    iconColor:
+                                        colorScheme.onSurface, // Ícone escuro
+                                    onTap: () {
+                                      Modular.to.pushNamed('./fale-conosco');
+                                    },
                                   ),
-                                  borderColor: colorScheme
-                                      .errorContainer, // Borda avermelhada
-                                  iconBackgroundColor: colorScheme
-                                      .errorContainer, // Fundo vermelho um pouco mais forte pro ícone
-                                  iconColor: colorScheme
-                                      .error, // Ícone vermelho escuro
-
-                                  onTap: () {
-                                    showEmergencyCallModal(context);
-                                  },
                                 ),
-                              ),
-                            ],
+                                const SizedBox(
+                                  width: 12,
+                                ), // Espaçamento entre os cards
+                                // Segundo Card (Alerta/Emergência)
+                                Expanded(
+                                  child: ContactCard(
+                                    title: 'Emergência',
+                                    subtitle: 'LIGAR',
+                                    iconPath: AppAssets.iconeAlerta,
+                                    backgroundColor:
+                                        AppColors.lightRed.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    borderColor: colorScheme
+                                        .errorContainer, // Borda avermelhada
+                                    iconBackgroundColor: colorScheme
+                                        .errorContainer, // Fundo vermelho um pouco mais forte pro ícone
+                                    iconColor: colorScheme
+                                        .error, // Ícone vermelho escuro
+
+                                    onTap: () {
+                                      showEmergencyCallModal(context);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
 
                           const SizedBox(height: 30),
                         ],
                       ),
-                    ),
-                };
-              },
-            ),
+                  };
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
